@@ -3,7 +3,7 @@ import type { Scenario, Vec3, ShadeState, DrifterState } from '../core/types.js'
 
 export class InputError extends Error {}
 
-const SHADE_STATES: ShadeState[] = ['spawning', 'wander', 'chase', 'recoil', 'stunned'];
+const SHADE_STATES: ShadeState[] = ['spawning', 'wander', 'chase', 'recoil', 'stunned', 'drain'];
 const DRIFTER_STATES: DrifterState[] = ['idle', 'chase', 'flee', 'removed'];
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -45,7 +45,7 @@ export function parseScenario(raw: unknown, lanternCount: number): Scenario {
     if (p.pos !== undefined) sc.player.pos = vec3(p.pos, 'scenario.player.pos');
     if (p.carried !== undefined) sc.player.carried = int(p.carried, 'scenario.player.carried');
     if (p.flames !== undefined) sc.player.flames = int(p.flames, 'scenario.player.flames', 1);
-    for (const k of ['invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks'] as const) {
+    for (const k of ['invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks', 'successful_lights'] as const) {
       if (p[k] !== undefined) sc.player[k] = int(p[k], `scenario.player.${k}`);
     }
   }
@@ -64,6 +64,11 @@ export function parseScenario(raw: unknown, lanternCount: number): Scenario {
       if (s.id !== undefined) out.id = uniqueId(s.id, ids, `${w}.id`);
       if (s.state !== undefined) out.state = oneOf(s.state, SHADE_STATES, `${w}.state`);
       if (s.state_ticks_left !== undefined) out.state_ticks_left = int(s.state_ticks_left, `${w}.state_ticks_left`);
+      if (s.target_lantern_id !== undefined) {
+        const n = typeof s.target_lantern_id === 'string' ? /^L(\d+)$/.exec(s.target_lantern_id) : null;
+        if (!n || +n[1] < 1 || +n[1] > lanternCount) throw new InputError(`${w}.target_lantern_id: phải là L1..L${lanternCount}`);
+        out.target_lantern_id = s.target_lantern_id as string;
+      }
       return out;
     });
   }
@@ -101,6 +106,11 @@ export function parseScenario(raw: unknown, lanternCount: number): Scenario {
       if (l.pos !== undefined) out.pos = vec3(l.pos, `${w}.pos`);
       if (l.lit !== undefined) out.lit = bool(l.lit, `${w}.lit`);
       if (l.deposited !== undefined) out.deposited = int(l.deposited, `${w}.deposited`);
+      if (l.fuel !== undefined) {
+        if (!isNum(l.fuel) || l.fuel < 0 || l.fuel > 100) throw new InputError(`${w}.fuel: cần số trong [0, 100]`);
+        out.fuel = l.fuel;
+      }
+      if (l.ever_lit !== undefined) out.ever_lit = bool(l.ever_lit, `${w}.ever_lit`);
       return out;
     });
   }

@@ -35,6 +35,14 @@ export interface Tuning {
   dash_speed: number;
   dash_duration_s: number;
   dash_cooldown_s: number;
+  fuel_max: number;
+  fuel_decay_per_s: number;
+  fuel_per_mote: number;
+  relight_cost: number;
+  win_ratio: number;
+  drain_per_s: number;
+  low_fuel_threshold: number;
+  capacity_max: number;
   fall_enabled: boolean;
   score: ScoreTuning;
 }
@@ -42,7 +50,7 @@ export interface Tuning {
 export type MoteKind = 'random' | 'dropped';
 export interface Mote { id: string; pos: Vec3; kind: MoteKind; ttl: number; spawnIdx: number }
 
-export type ShadeState = 'spawning' | 'wander' | 'chase' | 'recoil' | 'stunned';
+export type ShadeState = 'spawning' | 'wander' | 'chase' | 'recoil' | 'stunned' | 'drain';
 export interface Shade {
   id: string;
   pos: Vec3;
@@ -55,6 +63,8 @@ export interface Shade {
   evictFrom: number; // index đèn đang đẩy ra
   home: [number, number];
   target: [number, number];
+  targetId: string | null; // đèn đang nhắm tới (wander) / đang hút (drain)
+  drainTicks: number; // số tick đã hút liên tục (để ghi fuel_drain mỗi 60 tick)
 }
 
 export type DrifterState = 'idle' | 'chase' | 'flee' | 'removed';
@@ -71,7 +81,8 @@ export interface Drifter {
 
 export interface Charm { id: string; pos: Vec3; available: boolean; respawnTicks: number }
 
-export interface Lantern { id: string; pos: Vec3; lit: boolean; deposited: number }
+/** fuel tính bằng đơn vị nguyên 1/60 (100 dầu = 6000) để không sai số số thực. */
+export interface Lantern { id: string; pos: Vec3; lit: boolean; deposited: number; fuel: number; everLit: boolean; relitCount: number }
 
 export interface Player {
   pos: Vec3;
@@ -109,17 +120,17 @@ export interface GameEvent { tick: number; name: string; data: Record<string, un
 export interface Scenario {
   player?: {
     pos?: Vec3; carried?: number; flames?: number;
-    invuln_ticks?: number; dash_cd_ticks?: number; pulse_cd_ticks?: number; charm_ticks?: number;
+    invuln_ticks?: number; dash_cd_ticks?: number; pulse_cd_ticks?: number; charm_ticks?: number; successful_lights?: number;
   };
   random_motes?: boolean;
   random_shades?: boolean;
   random_drifters?: boolean;
   wind_enabled?: boolean;
   motes?: Vec3[];
-  shades?: { id?: string; pos: Vec3; state?: ShadeState; state_ticks_left?: number }[];
+  shades?: { id?: string; pos: Vec3; state?: ShadeState; state_ticks_left?: number; target_lantern_id?: string }[];
   drifters?: { id?: string; pos: Vec3; state?: DrifterState; stolen?: number }[];
   charms?: { id?: string; pos?: Vec3; available?: boolean }[];
-  lanterns?: { id: string; pos?: Vec3; lit?: boolean; deposited?: number }[];
+  lanterns?: { id: string; pos?: Vec3; lit?: boolean; deposited?: number; fuel?: number; ever_lit?: boolean }[];
   time_left_s?: number;
 }
 

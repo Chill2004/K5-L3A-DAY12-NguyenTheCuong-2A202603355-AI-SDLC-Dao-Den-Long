@@ -52,3 +52,13 @@ export const WIND_SPEED = 2;
 export const WIND_WARN_TICKS = 120;
 
 export const EPS = 1e-9;
+
+// Ticket-03 (dầu đèn)
+export const FUEL_UNIT = 60; // 1 dầu = 60 đơn vị nguyên (1/60)
+export const RELIGHT_SCORE = 40;
+export const DRAIN_STUN_SCORE = 15; // tổng điểm khi Tỏa Sáng trúng bóng đang drain
+export const DAWN_LANTERN_BONUS = 50; // + floor(fuel) mỗi đèn đang sáng khi thắng
+export const DRAIN_RANGE = 2;
+export const DRAIN_CHASE_RANGE = 6;
+export const DRAIN_EVENT_TICKS = 60;
+export const UNLIT_ARRIVE = 2; // GĐ: bóng wander tới đèn tắt thì dừng trong 2 m

@@ -1,5 +1,5 @@
 // Chạy mô phỏng headless và tạo các dòng JSONL theo Test Contract v1.1 mục E.
-import { createGame, step, timeLeft, type Game } from '../core/sim.js';
+import { createGame, step, timeLeft, capacity, type Game } from '../core/sim.js';
 import { NEUTRAL_INPUT, type Input, type Scenario, type Tuning, type Vec3 } from '../core/types.js';
 import type { Frame } from './validate.js';
 
@@ -32,10 +32,11 @@ export function snapshot(g: Game) {
     score: g.score,
     wind: { active: g.wind.ticks > 0, dir_deg: g.wind.dirDeg },
     player: {
-      pos: v3(p.pos), vel: v3(p.vel), grounded: p.grounded, flames: p.flames, carried: p.carried,
+      pos: v3(p.pos), vel: v3(p.vel), grounded: p.grounded, flames: p.flames, carried: p.carried, capacity: capacity(g),
       invuln: p.invulnTicks > 0, dash_cd_s: sec(p.dashCdTicks), pulse_cd_s: sec(p.pulseCdTicks), charm_s: sec(p.charmTicks),
     },
-    lanterns: g.lanterns.map((l) => ({ id: l.id, pos: v3(l.pos), lit: l.lit, deposited: l.deposited })),
+    lanterns: g.lanterns.map((l) => ({ id: l.id, pos: v3(l.pos), lit: l.lit, deposited: l.deposited,
+      fuel: l.lit ? Math.round((l.fuel / 60) * 10) / 10 : 0, ever_lit: l.everLit, relit_count: l.relitCount })),
     shades: g.shades.map((s) => ({ id: s.id, pos: v3(s.pos), state: s.state })),
     motes_active: g.motes.length,
     motes: g.motes.map((m) => ({ id: m.id, pos: v3(m.pos), kind: m.kind, ttl_s: m.kind === 'dropped' ? sec(m.ttl) : null })),
