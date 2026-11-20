@@ -69,3 +69,25 @@ Công cụ: **Claude Code** (VS Code extension), model Claude Opus. Harness: [CL
 ### Token / chi phí ước tính
 - Phase 3: khoảng **~120k token vào + ~35k ra** (sửa có chọn lọc bằng Edit thay vì viết lại file). Số chính xác xem `/cost`. _(cập nhật sau khi kiểm tra)_
 - Tiết kiệm: chỉ sửa đúng các hàm bị ảnh hưởng; dùng lại cơ chế đẩy bóng (`evictTicks`) và generator scenario; đọc lỗi từ `verify` thay vì log dài.
+
+
+## Phase 4
+
+### Lời nhắc chính
+1. Dán Ticket-04. AI xếp thứ tự theo rủi ro: soak (headless) → bench → leaderboard (cần server để CLI export đọc được) → accessibility → tài liệu/phát hành.
+2. Khi bench không đạt: yêu cầu **đo tách** thời gian mô phỏng và render trước khi tối ưu tiếp.
+
+### Các lần AI sai / phải sửa
+| # | Sai gì | Phát hiện thế nào | Sửa |
+|---|---|---|---|
+| 9 | Đoán nguyên nhân p1-low thấp là số điểm ảnh, rồi là blending trong suốt: cả hai không cải thiện | Bench lặp lại cùng số | Thêm `sim_ms_p95`/`cpu_render_ms_p95` → GPU-bound → Lambert + tắt MSAA: p1 21 → 45 |
+| 10 | Kết luận vội "server từ chối tên có dấu" | Unit test chấp nhận "Mây_01" nhưng `curl` bị từ chối | Do `curl` trên Git Bash gửi sai mã hóa; thử bằng `fetch` Node thì đúng. Bài học: kiểm công cụ đo trước khi sửa code |
+| 11 | Soak vượt ngưỡng bộ nhớ (1.25×) khi bật JIT | `soak.json` | Chạy 30/60 Đêm chứng minh không rò rỉ; dùng `--jitless` cho soak_cmd, ghi rõ đối chứng |
+
+### Harness đã chỉnh
+- `CLAUDE.md`: lệnh bench/soak/serve/export, quy tắc "đo tách trước khi tối ưu", "kiểm công cụ đo khi kết quả mâu thuẫn test".
+- Bench tự ghi `sim_ms_p95`, `cpu_render_ms_p95` để lần sau chẩn đoán ngay.
+
+### Token / chi phí ước tính
+- Phase 4: khoảng **~200k token vào + ~60k ra** (nhiều tính năng + 7 lần chạy bench). Tổng dự án ước tính ~720k vào / ~210k ra. Số chính xác xem `/cost`.
+- Tiết kiệm: tái dùng `measure-fps` (CDP) làm nền cho bench, logic leaderboard viết một lần dùng cho server + web + test.

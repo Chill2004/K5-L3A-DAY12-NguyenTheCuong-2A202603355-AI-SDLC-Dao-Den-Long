@@ -137,3 +137,26 @@ Quyết định thiết kế: [ADR 0001](../adr/0001-lantern-fuel-and-dawn-win.m
 | C5 | `fuel_drain.fuel` | Dầu sau khi hút ở tick đó, 1 chữ số thập phân; bộ đếm 60 tick reset khi bóng rời `drain` |
 | C6 | Bóng `drain` chạm Mây | Không gây sát thương (chỉ `chase`/`wander` gây hit); Mây vào 6 m thì nó chuyển `chase` ngay trong bước 8 |
 | C7 | `score.per_second_left` trong tuning | Đặt 0 (ticket bỏ thưởng thời gian); điểm thắp lại/+15/bình minh nằm trong `constants.ts` |
+
+
+---
+
+## Phase 4 (Ticket-04, Contract v1.3)
+
+| ID | Tiêu chí | Bằng chứng |
+|---|---|---|
+| P4-1 | bench: avg ≥ 60, p1-low ≥ 30, load ≤ 10 s ở 1280×720, vsync tắt | `docs/proof/phase-4/bench.json` |
+| P4-2 | soak: 0 crash, mem_end ≤ 1.2 × mem_start | `docs/proof/phase-4/soak.json` |
+| P4-3 | leaderboard: tên hợp lệ, top 10, sắp xếp + hòa, lưu đĩa, export đúng thứ tự | `tests/phase4.test.ts`, `leaderboard-export.json` |
+| P4-4 | accessibility: đổi phím, phụ đề, giảm chuyển động, cỡ chữ | kiểm thủ công |
+
+| # | Chỗ mơ hồ | Giả định |
+|---|---|---|
+| D1 | "Đêm thứ i dùng seed 7 + i" | i đếm từ 1 (Đêm thứ 1 dùng seed 8); Đêm = ((i − 1) mod 3) + 1 |
+| D2 | Input soak "xác suất mỗi tick" | Mỗi nút được bấm (true) trong tick đó với xác suất đã nêu, độc lập; hướng di chuyển đổi ở tick 0, 30, 60... (độ dài 1) |
+| D3 | Cảnh bench "rải đều trên đảo" | Phân bố đều theo diện tích trên đĩa bán kính 38 m (seed 42); bóng giữ `wander` (không chuyển chase) vì ticket yêu cầu wander bình thường và tắt sát thương |
+| D4 | Hướng camera bench | Góc θ đo từ +X: điểm (30·cosθ, 15, 30·sinθ), θ = 2π·t/15 (cùng quy ước góc của Ticket-02) |
+| D5 | `load_ms` | Từ lúc tiến trình `node scripts/bench.mjs` bắt đầu (gồm khởi động server và Chrome) tới khung hình đầu tiên của cảnh bench |
+| D6 | Bảng xếp hạng ở bản web | Lưu đĩa qua `node scripts/serve.mjs`; không có server (dev / thư mục tĩnh) thì lưu trong localStorage |
+| D7 | `seed` trong mục xếp hạng | Seed của chuỗi Đêm (Đêm n dùng seed + n) |
+| D8 | Soak chạy `--jitless` | Để số RSS phản ánh rò rỉ thực, không bị nhiễu bởi bộ nhớ mã JIT (đo đối chứng có ghi trong proof) |

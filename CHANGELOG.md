@@ -1,5 +1,19 @@
 # Changelog
 
+## [phase-4 / v1.0.0] Contract v1.3: hoàn thiện và phát hành (Ticket-04)
+
+### Thêm
+- **Benchmark** `bench_cmd` = `node scripts/bench.mjs`: Chrome cửa sổ 1280×720, vsync tắt, cảnh chuẩn 200 Bóng Mực + 100 đom đóm, camera bay vòng; ghi `bench.json` (avg/p1-low/p95/frames/load_ms...).
+- **Soak** `soak_cmd` = `node --expose-gc --jitless build/headless/soak.js`: 10 Đêm liên tiếp, input ngẫu nhiên theo seed, đo RSS.
+- **Bảng xếp hạng** top 10 lưu đĩa (`.data/leaderboard.json`), màn hình từ menu, nhập tên sau Bình Minh/khi thua (hỗ trợ tiếng Việt có dấu), `node scripts/serve.mjs --export-leaderboard out.json`.
+- **Dễ tiếp cận:** đổi phím mọi hành động (báo trùng, khôi phục mặc định, lưu), phụ đề + mũi tên mép màn hình, giảm chuyển động, chữ ≥ 18 px và chữ lớn ×1.25.
+- Unit test: leaderboard, thống kê bench, cảnh bench (`tests/phase4.test.ts`).
+
+### Thay đổi
+- `run_cmd` đổi từ `npm run preview` sang `node scripts/serve.mjs` (phục vụ `dist/` + API bảng xếp hạng).
+- Render tối ưu cho iGPU: InstancedMesh cho Bóng Mực/đom đóm, vật liệu Lambert, tắt MSAA, pixelRatio = 1 (avg FPS bench 116 → 192, p1-low 29.7 → 38).
+- `contract_version` 1.2 → 1.3 (thêm `bench_cmd`, `soak_cmd`; v1.0–v1.2 giữ nguyên, toàn bộ 34 scenario vẫn đạt).
+
 ## [phase-3] Contract v1.2: "Đèn cạn dầu" (Ticket-03)
 
 ### Breaking changes

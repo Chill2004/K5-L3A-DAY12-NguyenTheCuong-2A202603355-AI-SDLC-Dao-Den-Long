@@ -1,6 +1,6 @@
 # CLAUDE.md: Đảo Đèn Lồng
 
-Game 3D (TypeScript + Three.js + Vite) có chế độ headless theo **Test Contract v1.2** (Ticket-03; quyết định thiết kế ở `docs/adr/`, breaking changes ở `CHANGELOG.md`; đề ở `docs/lab/`).
+Game 3D (TypeScript + Three.js + Vite) có chế độ headless theo **Test Contract v1.3** (Ticket-04; bench/soak/leaderboard ở `docs/proof/phase-4/`; quyết định thiết kế ở `docs/adr/`, breaking changes ở `CHANGELOG.md`; đề ở `docs/lab/`).
 
 ## Lệnh
 - Cài: `npm ci` · Build: `npm run build` (tsc headless → `build/`, Vite web → `dist/`)
@@ -9,6 +9,8 @@ Game 3D (TypeScript + Three.js + Vite) có chế độ headless theo **Test Cont
 - Sinh lại scenario: `npm run gen:scenarios` (sửa `scripts/gen-scenarios.mjs`, KHÔNG sửa tay JSON)
 - Đo FPS: `npx vite preview --port 4173` rồi `npm run fps` (Chrome, 1280×720, 3 Đêm)
 - Headless: `node build/headless/cli.js --seed 1 --night 1|2|3 --ticks 600 --out out.jsonl [--scenario f] [--inputs f]`
+- Bench: `node scripts/bench.mjs --seed 42 --duration 30 --out bench.json` (Chrome cửa sổ 1280×720; `--headless` nếu không có màn hình)
+- Soak: `npm run soak` · Chạy game + API bảng xếp hạng: `node scripts/serve.mjs` · Xuất: `node scripts/serve.mjs --export-leaderboard out.json`
 - Chơi: `npm run dev` · `?autostart&night=N` vào thẳng Đêm N · `?fps` hiện FPS
 
 ## Kiến trúc (bắt buộc giữ)
@@ -27,4 +29,6 @@ Game 3D (TypeScript + Three.js + Vite) có chế độ headless theo **Test Cont
 - Dầu đèn tính bằng đơn vị nguyên 1/60 (`fuel` 6000 = 100); vùng an toàn chỉ qua `hasSafeZone()`.
 - Sửa file: dùng Edit/Write hoặc script ghi ra file rồi chạy. KHÔNG patch bằng heredoc trong bash (đã làm mất ký tự `\` trong regex `/^L(\d+)$/`).
 - Luật bị ticket thay: cập nhật ADR + CHANGELOG + scenario cùng commit.
+- Hiệu năng: đo tách (sim vs render) trước khi tối ưu; render ưu tiên InstancedMesh + Lambert (iGPU).
+- Kết quả đo mâu thuẫn với test → kiểm công cụ đo trước (vd. `curl` Windows sai mã hóa UTF-8).
 - Commit nhỏ, mỗi commit một việc. Hook Stop chặn kết thúc khi `npm test` đỏ.
