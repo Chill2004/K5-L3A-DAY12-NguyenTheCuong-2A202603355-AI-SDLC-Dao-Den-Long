@@ -1,0 +1,79 @@
+{
+  "requirement": "R4 pulse: trong pulse_radius bị stunned pulse_stun_s (180 tick), đẩy pulse_push_m, tốn pulse_cost; per_stun",
+  "seed": 1,
+  "ticks": 200,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "pulse",
+        "data": {
+          "stunned_ids": [
+            "S1"
+          ]
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "score": 25,
+          "player": {
+            "carried": 1
+          },
+          "shades": [
+            {
+              "id": "S1",
+              "pos": [
+                9,
+                1,
+                0
+              ],
+              "state": "stunned"
+            },
+            {
+              "id": "far",
+              "state": "chase"
+            }
+          ]
+        }
+      },
+      {
+        "tick": 180,
+        "match": {
+          "shades": [
+            {
+              "id": "S1",
+              "pos": [
+                9,
+                1,
+                0
+              ],
+              "state": "stunned"
+            },
+            {}
+          ]
+        }
+      },
+      {
+        "tick": 190,
+        "match": {
+          "shades": [
+            {
+              "id": "S1",
+              "state": "chase"
+            },
+            {}
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 200,
+      "state": "playing",
+      "score": 25
+    }
+  }
+}

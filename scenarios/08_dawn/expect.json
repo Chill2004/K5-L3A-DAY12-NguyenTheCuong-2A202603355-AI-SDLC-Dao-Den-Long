@@ -1,0 +1,31 @@
+{
+  "requirement": "R5 hết giờ thì thua dawn; time_left_s = thời lượng - bước/60",
+  "seed": 1,
+  "ticks": 600,
+  "snapshot_every": 30,
+  "expect": {
+    "events": [
+      {
+        "tick": 60,
+        "name": "game_over",
+        "data": {
+          "result": "lost",
+          "reason": "dawn"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 30,
+        "match": {
+          "time_left_s": 0.5
+        }
+      }
+    ],
+    "end": {
+      "ticks": 60,
+      "state": "lost",
+      "score": 0
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "requirement": "R5 thắng khi đủ 5 đèn; đèn lit sẵn từ scenario không cộng điểm; điểm = 100 + floor(299.983)*1 + 3*50 = 549",
+  "seed": 1,
+  "ticks": 600,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "lantern_lit",
+        "data": {
+          "lantern_id": "L1"
+        }
+      },
+      {
+        "tick": 1,
+        "name": "game_over",
+        "data": {
+          "result": "won",
+          "reason": "all_lit"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 0,
+        "match": {
+          "score": 0
+        }
+      }
+    ],
+    "end": {
+      "ticks": 1,
+      "state": "won",
+      "score": 549
+    }
+  }
+}

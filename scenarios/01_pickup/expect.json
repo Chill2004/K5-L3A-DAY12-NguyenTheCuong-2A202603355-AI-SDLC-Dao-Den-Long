@@ -1,0 +1,57 @@
+{
+  "requirement": "R2 nhặt đom đóm trong pickup_radius; R9 per_mote; mô hình tick",
+  "seed": 1,
+  "ticks": 60,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 36,
+        "name": "mote_picked",
+        "data": {
+          "carried": 1
+        }
+      }
+    ],
+    "event_count": {
+      "mote_picked": 1
+    },
+    "snapshots": [
+      {
+        "tick": 30,
+        "match": {
+          "score": 0,
+          "motes_active": 1,
+          "player": {
+            "pos": [
+              0,
+              0,
+              3
+            ],
+            "carried": 0
+          }
+        }
+      },
+      {
+        "tick": 40,
+        "match": {
+          "score": 10,
+          "motes_active": 0,
+          "player": {
+            "pos": [
+              0,
+              0,
+              4
+            ],
+            "carried": 1
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 60,
+      "state": "playing",
+      "score": 10
+    }
+  }
+}

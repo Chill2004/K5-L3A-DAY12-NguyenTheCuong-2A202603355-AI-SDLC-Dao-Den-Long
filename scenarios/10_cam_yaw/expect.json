@@ -1,0 +1,38 @@
+{
+  "requirement": "R1 tốc độ player_speed; yaw 90 biến z thành +X; vector [1,1] được chuẩn hóa",
+  "seed": 1,
+  "ticks": 130,
+  "snapshot_every": 60,
+  "expect": {
+    "snapshots": [
+      {
+        "tick": 60,
+        "match": {
+          "player": {
+            "pos": [
+              6,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "tick": 120,
+        "match": {
+          "player": {
+            "pos": [
+              10.243,
+              0,
+              4.243
+            ]
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 130,
+      "state": "playing"
+    }
+  }
+}

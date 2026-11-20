@@ -1,0 +1,64 @@
+{
+  "requirement": "R3 nạp trong interact_radius, đủ lantern_cost thì thắp; R9 per_lantern",
+  "seed": 1,
+  "ticks": 20,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "deposit",
+        "data": {
+          "lantern_id": "L1",
+          "amount": 5,
+          "deposited": 5
+        }
+      },
+      {
+        "tick": 1,
+        "name": "lantern_lit",
+        "data": {
+          "lantern_id": "L1"
+        }
+      }
+    ],
+    "no_events": [
+      "game_over"
+    ],
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "score": 100,
+          "player": {
+            "carried": 0
+          },
+          "lanterns": [
+            {
+              "id": "L1",
+              "lit": true,
+              "deposited": 5
+            },
+            {
+              "lit": false
+            },
+            {
+              "lit": false
+            },
+            {
+              "lit": false
+            },
+            {
+              "lit": false
+            }
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 20,
+      "state": "playing",
+      "score": 100
+    }
+  }
+}

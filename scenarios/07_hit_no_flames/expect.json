@@ -1,0 +1,53 @@
+{
+  "requirement": "R4/R5 chạm mất 1 flame, rơi floor(carried*hit_drop_ratio), bất tử invuln_s; hết flame thì thua no_flames",
+  "seed": 1,
+  "ticks": 1000,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 35,
+        "name": "player_hit",
+        "data": {
+          "by": "shade",
+          "flames": 2,
+          "dropped": 2
+        }
+      },
+      {
+        "tick": 125,
+        "name": "player_hit",
+        "data": {
+          "by": "shade",
+          "flames": 1,
+          "dropped": 1
+        }
+      },
+      {
+        "tick": 215,
+        "name": "player_hit",
+        "data": {
+          "by": "shade",
+          "flames": 0,
+          "dropped": 0
+        }
+      },
+      {
+        "tick": 215,
+        "name": "game_over",
+        "data": {
+          "result": "lost",
+          "reason": "no_flames"
+        }
+      }
+    ],
+    "event_count": {
+      "player_hit": 3
+    },
+    "end": {
+      "ticks": 215,
+      "state": "lost",
+      "score": 0
+    }
+  }
+}
