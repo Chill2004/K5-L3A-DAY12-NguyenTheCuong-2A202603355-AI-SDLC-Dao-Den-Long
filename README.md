@@ -3,8 +3,9 @@
 > **Video demo:** _(sẽ thêm ở Phase 4, đính kèm Release `v1.0.0`)_
 > Bài Lab Day 12 AI SDLC: Nguyễn Thế Cường, 2A202603355. Đề bài: [docs/lab/](docs/lab/README.md).
 
-Game 3D góc nhìn thứ ba: Mây, người giữ đèn nhỏ tuổi, gom đom đóm để thắp lại 5 Đèn Lồng Lớn trên Đảo Bến và né Bóng Mực trong sương đen.
-Viết bằng TypeScript + Three.js; logic game tách riêng nên chạy được headless theo **Test Contract v1.0**.
+Game 3D góc nhìn thứ ba: Mây, người giữ đèn nhỏ tuổi, gom đom đóm để thắp lại các Đèn Lồng Lớn trên **ba hòn đảo**
+(Đảo Bến, Đảo Cau, Đảo Chuông) và né Bóng Mực, Gió Lạc trong sương đen.
+Viết bằng TypeScript + Three.js; logic game tách riêng nên chạy được headless theo **Test Contract v1.1**.
 
 ## Cài đặt và chạy (macOS / Linux / Windows, cần Node.js ≥ 20)
 
@@ -20,68 +21,79 @@ npm run preview          # mở http://localhost:4173
 |---|---|
 | W A S D | Di chuyển (theo hướng camera) |
 | Space | Nhảy |
-| E | Nạp đom đóm vào Đèn Lồng chưa sáng ở gần |
-| F | Xung sáng: tốn 1 đom đóm, làm choáng và đẩy lùi Bóng Mực xung quanh |
+| Shift | Lướt (14 m/s trong 0.2 s, hồi chiêu 1.5 s) |
+| E | Nạp đom đóm vào Đèn Lồng chưa sáng ở gần (≤ 2 m) |
+| F | Tỏa Sáng: tốn 3 đom đóm, làm choáng và đẩy lùi Bóng Mực trong 5 m |
 | Kéo chuột / ← → | Xoay camera |
-| R | Chơi lại · Enter: bắt đầu |
+| Esc / P | Tạm dừng: Tiếp tục / Chơi lại Đêm / Cài đặt (âm lượng, độ nhạy chuột) / Về menu |
 
-## Luật chơi và cách tính điểm
+## Luật chơi (số chuẩn Ticket-02)
 
-- Đom đóm được **nhặt tự động** khi đi tới gần (≤ 1.5 m), mang tối đa 10 con.
-- Mỗi Đèn Lồng cần **5 đom đóm**; đứng gần (≤ 3 m) và bấm E để nạp. Thắp đủ 5 đèn thì **thắng**.
-- Bóng Mực đuổi theo; chạm vào thì mất 1 lửa (có 3 lửa), rơi mất một nửa số đom đóm đang mang, rồi được bất tử 1.5 s. Hết lửa thì **thua**.
-- Bóng Mực không vào được vòng 5 m quanh **đèn đã sáng**. Đứng trong vòng đó là an toàn.
-- Hết 5 phút (bình minh) mà chưa thắp đủ đèn thì **thua**.
+- **3 Đêm** nối tiếp: Đảo Bến (5 đèn, 300 s), Đảo Cau (6 đèn, 330 s, hai đảo nối cầu tre, có bục nhảy), Đảo Chuông (7 đèn, 360 s, 3 tầng, dốc, bục nhảy, gió mạnh).
+  Thắng Đêm 3 thì tới màn Bình Minh với tổng điểm; thua thì chơi lại Đêm đó.
+- Đom đóm nhặt tự động (≤ 1 m), mang tối đa 10. Mỗi đèn cần **10 đom đóm**, nạp nhiều lần được.
+- Bóng Mực phát hiện trong 12 m, bỏ đuổi khi xa hơn 18 m. Chạm vào: −1 Ngọn Lửa (có 3), rơi một nửa số đom đóm xuống đất (nhặt lại được trong 8 s), bất tử 1.5 s.
+- Đèn đã sáng tạo vùng an toàn 6 m mà Bóng Mực không vào được.
+- **Gió Lạc** (Đêm 2, 3) đuổi khi bạn mang ≥ 5 đom đóm và cướp 3 con; Tỏa Sáng trúng nó thì nó thả lại.
+- **Bùa Gió** (lá bùa đỏ): 10 s chạy nhanh 7.2 m/s và lướt không hồi chiêu.
+- Rơi khỏi đảo: −1 Ngọn Lửa, mất hết đom đóm, hồi sinh ở điểm xuất phát.
 
-| Hành động | Điểm |
+| Điểm | |
 |---|---:|
-| Nhặt 1 đom đóm | +10 |
-| Thắp 1 đèn | +100 |
-| Làm choáng 1 Bóng Mực bằng xung sáng | +25 |
-| Khi thắng: mỗi giây còn lại (làm tròn xuống) | +1 |
-| Khi thắng: mỗi lửa còn lại | +50 |
+| Mỗi đom đóm nạp vào đèn | +10 |
+| Mỗi đèn thắp | +100 |
+| Mỗi Bóng Mực trúng Tỏa Sáng | +5 |
+| Khi thắng Đêm: mỗi giây còn lại (làm tròn xuống) | +2 |
+| Khi thắng Đêm: mỗi Ngọn Lửa còn lại | +50 |
 
-## Chế độ headless (Test Contract v1.0)
+Tổng điểm game là tổng điểm các Đêm đã thắng.
+
+## Chế độ headless (Test Contract v1.1)
 
 Khai báo ở [`game.contract.json`](game.contract.json). Sau `npm ci && npm run build`:
 
 ```bash
-node build/headless/cli.js --seed 1 --night 1 --ticks 600 --out out.jsonl \
-  [--scenario scenarios/05_pulse_stun/scenario.json] [--inputs scenarios/05_pulse_stun/inputs.json] [--snapshot-every 10]
+node build/headless/cli.js --seed 1 --night 2 --ticks 600 --out out.jsonl \
+  [--scenario scenarios/17_charm/scenario.json] [--inputs scenarios/17_charm/inputs.json] [--snapshot-every 10]
 ```
 
-60 tick/giây cố định, không cần cửa sổ. Mã thoát: `0` ổn, `2` file scenario/inputs sai định dạng, `1` lỗi tham số.
-Khái niệm có trong contract nhưng không có trong game: `fall_enabled = false` (đảo có biên vô hình, không rơi được, nên không bao giờ có `player_hit` với `by: "fall"`). `dash` không có (input `dash` bị bỏ qua).
-Các hằng số ngoài contract (bán kính đảo 40 m, vị trí đèn, nhịp sinh đom đóm/Bóng Mực...) nằm trong [`src/core/constants.ts`](src/core/constants.ts).
+60 tick/giây cố định, không cần cửa sổ; một Đêm đầy đủ chạy khoảng 0.3 s. Mã thoát: `0` ổn, `2` file scenario/inputs sai định dạng, `1` lỗi tham số.
+Hằng số chuẩn ngoài tuning nằm trong [`src/core/constants.ts`](src/core/constants.ts), bản đồ chuẩn trong [`src/core/maps.ts`](src/core/maps.ts).
+Giả định cho chỗ ticket chưa nói (điểm xuất phát Đêm 3, trạng thái `spawning`...) ở [assumptions.md](docs/notes/assumptions.md).
 
 ## Test và kiểm chứng
 
 ```bash
-npm test                 # unit + 13 scenario headless + tất định (Vitest)
-npm run verify           # chạy CLI thật cho mọi scenario 2 lần, kiểm mã thoát, ghi docs/proof/phase-1/
+npm test                     # unit + 24 scenario headless + tất định (Vitest)
+npm run verify -- phase-2    # chạy CLI thật cho mọi scenario 2 lần, mã thoát, hiệu năng; ghi docs/proof/phase-2/
+npm run fps                  # (cần `npx vite preview --port 4173`) đo FPS 3 Đêm ở 1280×720 bằng Chrome
 ```
 
 CI (GitHub Actions) chạy build, test và verify trên Ubuntu và macOS mỗi lần push.
-Bằng chứng từng phase: [docs/proof/](docs/proof/phase-1/README.md). Giả định: [docs/notes/assumptions.md](docs/notes/assumptions.md). Nhật ký AI: [docs/notes/ai-log.md](docs/notes/ai-log.md).
+Bằng chứng: [Phase 1](docs/proof/phase-1/README.md) · [Phase 2](docs/proof/phase-2/README.md). Nhật ký AI: [ai-log.md](docs/notes/ai-log.md).
 
 ## Cấu trúc
 
 ```text
-src/core/       logic game thuần (tick 60 Hz, RNG có seed), dùng chung cho headless và đồ họa
+src/core/       logic game thuần (tick 60 Hz, RNG có seed, 3 bản đồ chuẩn), dùng chung cho headless và đồ họa
 src/headless/   CLI, kiểm tra đầu vào, ghi JSONL
-src/render/     Three.js: chỉ vẽ state và đọc bàn phím
-scenarios/      scenario headless: scenario.json, inputs.json, expect.json (tính tay từ spec)
+src/render/     Three.js (world.ts), luồng 3 Đêm + HUD (main.ts), âm thanh WebAudio, cài đặt
+scenarios/      scenario headless (sinh bởi scripts/gen-scenarios.mjs; kỳ vọng tính tay)
 tests/          Vitest
-scripts/        verify.mjs (kiểm chứng E2E + sinh báo cáo bằng chứng)
+scripts/        verify.mjs, gen-scenarios.mjs, measure-fps.mjs
 CLAUDE.md, .claude/   harness AI: hướng dẫn, hook Stop chặn khi test đỏ, skill verify
 ```
 
 ## Sáng tạo của tôi
 
-- **Đom đóm bay quanh Mây:** số đom đóm đang mang hiện thành các đốm sáng bay vòng quanh người Mây, nhìn là biết mình đang mang bao nhiêu.
-  Chỉ có ở phần hiển thị (`src/render/main.ts`), không có trong core, nên output headless không đổi: `npm test` vẫn đạt toàn bộ scenario.
-- **Vòng sáng an toàn:** đèn đã sáng có vòng quầng vàng trên mặt đất đúng bằng `safe_radius`, giúp người chơi thấy chỗ trú. Bầu trời và sương chuyển ấm dần theo số đèn đã sáng.
-  Ảnh: [docs/proof/phase-1/img/lanterns-lit.png](docs/proof/phase-1/img/lanterns-lit.png).
+Tất cả chỉ nằm ở phần hiển thị (`src/render/`), không có trong core, nên output headless không đổi: `npm test` vẫn đạt toàn bộ scenario.
+
+- **Đom đóm bay quanh Mây:** số đom đóm đang mang hiện thành các đốm sáng bay vòng quanh người Mây.
+- **Vòng sáng an toàn:** đèn đã sáng có vòng quầng trên mặt đất đúng bằng bán kính vùng an toàn (6 m).
+- **Lời Ông Đăng** riêng cho từng Đêm ở màn giới thiệu; nhạc nền ngũ cung tự tổng hợp bằng WebAudio.
+- Đom đóm bị rơi nhấp nháy trong 2 s cuối trước khi biến mất.
+
+Ảnh: [docs/proof/phase-2/img/](docs/proof/phase-2/img/).
 
 ## Giấy phép
 

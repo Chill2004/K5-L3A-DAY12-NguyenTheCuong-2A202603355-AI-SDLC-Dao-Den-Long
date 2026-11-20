@@ -1,0 +1,28 @@
+{
+  "when": "2026-11-20T08:37:39.509Z",
+  "machine": "Windows_NT 10.0.26300 · Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz",
+  "browser": "C:/Program Files/Google/Chrome/Application/chrome.exe",
+  "results": [
+    {
+      "night": 1,
+      "avg": 162.69300970404979,
+      "n": 9,
+      "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x00009BC4) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "size": "1280x720"
+    },
+    {
+      "night": 2,
+      "avg": 167.5643421565872,
+      "n": 11,
+      "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x00009BC4) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "size": "1280x720"
+    },
+    {
+      "night": 3,
+      "avg": 124.0700473312717,
+      "n": 11,
+      "gpu": "ANGLE (Intel, Intel(R) UHD Graphics (0x00009BC4) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "size": "1280x720"
+    }
+  ]
+}
