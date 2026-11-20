@@ -109,3 +109,31 @@ nhưng `sim.ts` được viết lại theo **thứ tự 12 bước bắt buộc*
 | B14 | Gió | Cơn gió bắt đầu ở sim_tick 1800k (30 s, 60 s...), `dir_deg` nguyên 0–359 theo seed, đo từ +X; báo trước 120 tick chỉ ở phần hiển thị |
 | B15 | Tạm dừng ở bản thường | Ngừng gọi `step` (logic dừng hoàn toàn); input `pause` của contract dùng cho headless |
 | B16 | Điểm sinh Gió Lạc ("điểm sương") | Dùng chung danh sách điểm sinh Bóng Mực của Đêm đó |
+
+---
+
+## Phase 3 (Ticket-03 "Đèn cạn dầu", Contract v1.2)
+
+Quyết định thiết kế: [ADR 0001](../adr/0001-lantern-fuel-and-dawn-win.md). Breaking changes và test bị thay: [CHANGELOG](../../CHANGELOG.md).
+
+### Tiêu chí nghiệm thu
+| ID | Tiêu chí | Scenario |
+|---|---|---|
+| T3-1 | Đèn sáng hao 1/s, tới 0 thì tắt ngay sau bước 2, `lantern_out`, deposited 0 | `24` |
+| T3-2 | Châm dầu đúng công thức, trần 100, đèn đầy không được chọn | `25` |
+| T3-3 | Thắp lại cần 5, `relight: true`, +40, `relit_count` | `26` |
+| T3-4 | Dầu < 30 mất vùng; `wander` tới đèn yếu, `drain` trong 2 m, hút 5/s, `fuel_drain` mỗi 60 tick | `27` |
+| T3-5 | Tỏa Sáng bóng `drain` +15; châm lên ≥ 30 đẩy bóng ra | `28`, `30` |
+| T3-6 | Thắng `dawn_survived` khi ≥ ceil(0.6 n) đèn sáng lúc hết giờ; không thắng sớm | `04`, `04b`, `04c`, `29`, `29b` |
+| T3-7 | Sức chứa 10 + 2 × lần thắp (≤ 20) | `02`, `04c`, `26` |
+
+### Giả định mới
+| # | Chỗ mơ hồ | Giả định |
+|---|---|---|
+| C1 | `ever_lit` trong scenario không ghi | Mặc định = `lit` (đèn đặt sẵn đang sáng coi như đã từng sáng) |
+| C2 | Đèn `lit: false` trong scenario có `fuel` | Bỏ qua, fuel = 0 |
+| C3 | "Về đèn tắt gần nhất như trước" | Ticket-02 chưa định nghĩa `wander`; từ Phase 3 `wander` đi tới đèn yếu, rồi đèn tắt gần nhất, dừng trong 2 m; không có đèn nào thì lượn quanh điểm sinh như B3 |
+| C4 | Châm dầu đẩy bóng ra | Chỉ khi đèn chuyển từ < 30 lên ≥ 30 (đèn ≥ 30 vốn đã chặn bóng ở mép) |
+| C5 | `fuel_drain.fuel` | Dầu sau khi hút ở tick đó, 1 chữ số thập phân; bộ đếm 60 tick reset khi bóng rời `drain` |
+| C6 | Bóng `drain` chạm Mây | Không gây sát thương (chỉ `chase`/`wander` gây hit); Mây vào 6 m thì nó chuyển `chase` ngay trong bước 8 |
+| C7 | `score.per_second_left` trong tuning | Đặt 0 (ticket bỏ thưởng thời gian); điểm thắp lại/+15/bình minh nằm trong `constants.ts` |

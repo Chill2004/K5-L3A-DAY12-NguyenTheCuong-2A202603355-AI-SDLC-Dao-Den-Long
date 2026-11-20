@@ -53,3 +53,19 @@ Công cụ: **Claude Code** (VS Code extension), model Claude Opus. Harness: [CL
 ### Token / chi phí ước tính
 - Phase 2: khoảng **~250k token vào + ~70k token ra** (ticket dài, viết lại `sim.ts` khoảng 600 dòng, render khoảng 700 dòng, 24 scenario). Số chính xác xem `/cost`. _(cập nhật sau khi kiểm tra)_
 - Tiết kiệm: core/headless trước, render sau; sinh scenario bằng script thay vì viết tay 70 file JSON; đọc lỗi qua `verify` (thông báo ngắn) thay vì đọc log Vitest dài; không đọc lại file vừa viết.
+
+## Phase 3
+
+### Lời nhắc chính
+1. Dán Ticket-03. AI lập bảng luật [THAY THẾ] → test bị ảnh hưởng trước khi code (02, 03, 04, 16).
+2. Thứ tự: types/constants → `sim.ts` (dầu ở bước 2, `drain`, tương tác mới, luật thắng) → snapshot/validate/contract v1.2 → scenario → render (thanh dầu, mù màu) → ADR + CHANGELOG.
+
+### Các lần AI sai / phải sửa
+| # | Sai gì | Phát hiện thế nào | Sửa |
+|---|---|---|---|
+| 7 | Patch bằng `node` + heredoc trong bash làm mất dấu `\` của regex `/^L(\d+)$/` → mọi `target_lantern_id` bị coi là sai (exit 2) | `npm run verify` báo `28_pulse_drain_bonus` exit 2 | Sửa regex. **Lần thứ 3 heredoc gây lỗi** → từ giờ viết script patch ra file (Write) rồi chạy, ghi vào CLAUDE.md |
+| 8 | Thanh dầu dạng billboard không hiện: copy quaternion camera rồi xóa góc x/z thì Euler có thể thành (π, 0, π) → mặt phẳng quay lưng | Ảnh chụp không thấy thanh dầu | Tính yaw trực tiếp `atan2(cam − lantern)` |
+
+### Token / chi phí ước tính
+- Phase 3: khoảng **~120k token vào + ~35k ra** (sửa có chọn lọc bằng Edit thay vì viết lại file). Số chính xác xem `/cost`. _(cập nhật sau khi kiểm tra)_
+- Tiết kiệm: chỉ sửa đúng các hàm bị ảnh hưởng; dùng lại cơ chế đẩy bóng (`evictTicks`) và generator scenario; đọc lỗi từ `verify` thay vì log dài.

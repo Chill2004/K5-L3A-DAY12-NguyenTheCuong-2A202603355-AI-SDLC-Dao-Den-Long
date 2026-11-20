@@ -5,7 +5,9 @@
 
 Game 3D góc nhìn thứ ba: Mây, người giữ đèn nhỏ tuổi, gom đom đóm để thắp lại các Đèn Lồng Lớn trên **ba hòn đảo**
 (Đảo Bến, Đảo Cau, Đảo Chuông) và né Bóng Mực, Gió Lạc trong sương đen.
-Viết bằng TypeScript + Three.js; logic game tách riêng nên chạy được headless theo **Test Contract v1.1**.
+Viết bằng TypeScript + Three.js; logic game tách riêng nên chạy được headless theo **Test Contract v1.2**.
+
+> **Phase 3 (Đèn cạn dầu):** đèn có dầu và có thể tắt; mục tiêu là **giữ đủ 60% số đèn sáng tới bình minh**. Xem [CHANGELOG](CHANGELOG.md) và [ADR 0001](docs/adr/0001-lantern-fuel-and-dawn-win.md).
 
 ## Cài đặt và chạy (macOS / Linux / Windows, cần Node.js ≥ 20)
 
@@ -22,7 +24,7 @@ npm run preview          # mở http://localhost:4173
 | W A S D | Di chuyển (theo hướng camera) |
 | Space | Nhảy |
 | Shift | Lướt (14 m/s trong 0.2 s, hồi chiêu 1.5 s) |
-| E | Nạp đom đóm vào Đèn Lồng chưa sáng ở gần (≤ 2 m) |
+| E | Nạp đom đóm để thắp đèn (10, thắp lại 5) hoặc châm dầu cho đèn đang sáng (≤ 2 m) |
 | F | Tỏa Sáng: tốn 3 đom đóm, làm choáng và đẩy lùi Bóng Mực trong 5 m |
 | Kéo chuột / ← → | Xoay camera |
 | Esc / P | Tạm dừng: Tiếp tục / Chơi lại Đêm / Cài đặt (âm lượng, độ nhạy chuột) / Về menu |
@@ -70,7 +72,7 @@ npm run fps                  # (cần `npx vite preview --port 4173`) đo FPS 3 
 ```
 
 CI (GitHub Actions) chạy build, test và verify trên Ubuntu và macOS mỗi lần push.
-Bằng chứng: [Phase 1](docs/proof/phase-1/README.md) · [Phase 2](docs/proof/phase-2/README.md). Nhật ký AI: [ai-log.md](docs/notes/ai-log.md).
+Bằng chứng: [Phase 1](docs/proof/phase-1/README.md) · [Phase 2](docs/proof/phase-2/README.md) · [Phase 3](docs/proof/phase-3/README.md). Nhật ký AI: [ai-log.md](docs/notes/ai-log.md).
 
 ## Cấu trúc
 

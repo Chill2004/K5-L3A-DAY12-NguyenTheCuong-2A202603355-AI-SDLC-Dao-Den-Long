@@ -1,6 +1,6 @@
 # CLAUDE.md: Đảo Đèn Lồng
 
-Game 3D (TypeScript + Three.js + Vite) có chế độ headless theo **Test Contract v1.1** (Ticket-02; đề ở `docs/lab/`).
+Game 3D (TypeScript + Three.js + Vite) có chế độ headless theo **Test Contract v1.2** (Ticket-03; quyết định thiết kế ở `docs/adr/`, breaking changes ở `CHANGELOG.md`; đề ở `docs/lab/`).
 
 ## Lệnh
 - Cài: `npm ci` · Build: `npm run build` (tsc headless → `build/`, Vite web → `dist/`)
@@ -24,4 +24,7 @@ Game 3D (TypeScript + Three.js + Vite) có chế độ headless theo **Test Cont
 - Tránh đặt kỳ vọng đúng biên số thực (vd. x = 40.0, r = 8.0): lệch 1 tick do làm tròn. Dịch điểm xuất phát 0.05 m.
 - KHÔNG sửa kỳ vọng chỉ để test qua; test bị yêu cầu mới thay thế thì ghi lý do trong `docs/notes/assumptions.md`.
 - Giả định mới → `docs/notes/assumptions.md`; lỗi của AI → `docs/notes/ai-log.md`.
+- Dầu đèn tính bằng đơn vị nguyên 1/60 (`fuel` 6000 = 100); vùng an toàn chỉ qua `hasSafeZone()`.
+- Sửa file: dùng Edit/Write hoặc script ghi ra file rồi chạy. KHÔNG patch bằng heredoc trong bash (đã làm mất ký tự `\` trong regex `/^L(\d+)$/`).
+- Luật bị ticket thay: cập nhật ADR + CHANGELOG + scenario cùng commit.
 - Commit nhỏ, mỗi commit một việc. Hook Stop chặn kết thúc khi `npm test` đỏ.
