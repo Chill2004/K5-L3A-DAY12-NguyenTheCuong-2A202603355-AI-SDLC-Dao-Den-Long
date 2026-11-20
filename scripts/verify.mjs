@@ -59,6 +59,18 @@ const exitRows = exitCases.map(([name, fn, want]) => {
   return { name, code: r.code, ok, stderr: r.stderr.trim() };
 });
 
+// Hiệu năng headless: một Đêm đầy đủ (tối đa 21.600 tick) phải xong trong <= 30 s
+const perfRows = [1, 2, 3].map((night) => {
+  const out = join(os.tmpdir(), `ddl-perf-${night}.jsonl`);
+  const t0 = performance.now();
+  const r = cli(['--seed', '1', '--night', String(night), '--ticks', '21600', '--out', out]);
+  const ms = performance.now() - t0;
+  const end = r.code === 0 ? JSON.parse(readFileSync(out, 'utf8').trim().split('\n').pop()) : {};
+  const ok = r.code === 0 && ms <= 30000;
+  if (!ok) failed++;
+  return { night, ms, end, ok };
+});
+
 const md = [
   `# Bằng chứng headless: ${phase}`,
   '',
@@ -76,6 +88,12 @@ const md = [
   '| Trường hợp | Mã thoát | stderr | Kết quả |',
   '|---|---:|---|---|',
   ...exitRows.map((r) => `| ${r.name} | ${r.code} | ${r.stderr.replaceAll('|', '/').replaceAll('\\', '/').slice(0, 90)} | ${r.ok ? 'ĐẠT' : 'CHƯA ĐẠT'} |`),
+  '',
+  '## Hiệu năng headless (một Đêm đầy đủ, ngưỡng 30 s)',
+  '',
+  '| Đêm | Lệnh | Kết thúc | Thời gian | Kết quả |',
+  '|---|---|---|---:|---|',
+  ...perfRows.map((r) => `| ${r.night} | \`--seed 1 --night ${r.night} --ticks 21600\` | ${r.end.state} @${r.end.ticks} | ${(r.ms / 1000).toFixed(2)} s | ${r.ok ? 'ĐẠT' : 'CHƯA ĐẠT'} |`),
   '',
   '## Lệnh tái lập',
   '',

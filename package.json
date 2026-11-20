@@ -13,7 +13,9 @@
     "headless": "node build/headless/cli.js",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "verify": "npm run build:node && node scripts/verify.mjs"
+    "verify": "npm run build:node && node scripts/verify.mjs",
+    "fps": "node scripts/measure-fps.mjs",
+    "gen:scenarios": "node scripts/gen-scenarios.mjs"
   },
   "dependencies": {
     "three": "0.170.0"
