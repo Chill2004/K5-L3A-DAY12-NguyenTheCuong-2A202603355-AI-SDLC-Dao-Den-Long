@@ -1,21 +1,54 @@
-// Hằng số của game KHÔNG có trong tuning của contract (xem docs/notes/assumptions.md).
+// Hằng số chuẩn của Ticket-02 không nằm trong tuning của contract, và vài giả định riêng (đánh dấu GĐ).
 export const TICK_RATE = 60;
-export const ISLAND_RADIUS = 40; // đảo tròn, tâm (0,0,0); không rơi được (fall_enabled=false)
-export const LANTERN_RING_RADIUS = 25; // L1..L5 đặt đều trên vòng tròn này, L1 tại (0,0,25)
-export const JUMP_VELOCITY = 7; // m/s
-export const GRAVITY = 20; // m/s^2
-export const SHADE_HEIGHT = 1; // tâm Bóng Mực tự sinh ở y = 1
+export const JUMP_VELOCITY = 7;
+export const GRAVITY = 20;
+export const STEP_HEIGHT = 0.35; // GĐ: bậc cao tối đa đi bộ lên được (dốc 0.5 → 0.117 m/tick khi lướt)
 
-export const INITIAL_MOTES = 30;
+export const CHARM_SPEED = 7.2;
+export const CHARM_TICKS = 600;
+export const CHARM_RESPAWN_TICKS = 2700;
+export const PICKUP_DY = 1.5;
+
+export const INITIAL_MOTES = 20;
 export const MAX_MOTES = 30;
-export const MOTE_RESPAWN_S = 4; // mỗi 4 s sinh thêm 1 đom đóm nếu còn < MAX_MOTES
-export const MOTE_MIN_R = 4;
-export const MOTE_MAX_R = 37;
+export const MOTE_RESPAWN_TICKS = 240;
+export const DROPPED_TTL_TICKS = 480;
+export const DROP_RING_MIN = 1.5;
+export const DROP_RING_MAX = 2.5;
 
-export const INITIAL_SHADES = 2;
-export const MAX_SHADES = 6;
-export const SHADE_SPAWN_S = 25; // mỗi 25 s sinh thêm 1 Bóng Mực nếu còn < MAX_SHADES
-export const SHADE_SPAWN_R = 35;
-export const SHADE_SPAWN_MIN_DIST = 15; // không sinh trong vòng 15 m quanh người chơi
+export const SAFE_EVICT_TICKS = 30;
+export const PULSE_CENTER_Y = 0.8;
+export const PULSE_PUSH_TICKS = 15;
+
+export const SHADE_DETECT = 12;
+export const SHADE_LOSE = 18;
+export const SHADE_HIT_DY = 1.5;
+export const SHADE_FIRST_SPAWN_TICK = 300;
+export const SHADE_SPAWN_MIN_DIST = 15;
+export const SHADE_SPAWNING_TICKS = 60; // GĐ: thời gian trạng thái spawning (vô hại, đứng yên)
+export const SHADE_WANDER_SPEED = 1.5; // GĐ
+export const WANDER_RADIUS = 6; // GĐ: lượn quanh điểm sinh
+export const RECOIL_TICKS = 60;
+export const RECOIL_DIST = 2;
+
+export const DRIFTER_SPEED = 7;
+export const DRIFTER_IDLE_SPEED = 2;
+export const DRIFTER_MAX = 2;
+export const DRIFTER_SPAWN_TICKS = 1200;
+export const DRIFTER_DETECT = 15;
+export const DRIFTER_MIN_CARRY = 5;
+export const DRIFTER_HIT = 1.2;
+export const DRIFTER_STEAL = 3;
+export const DRIFTER_FLEE_TICKS = 240;
+export const DRIFTER_DROP_VANISH_TICKS = 120;
+
+export const FALL_Y = -10;
+export const FALL_WAIT_TICKS = 60;
+export const RESPAWN_INVULN_TICKS = 90;
+
+export const WIND_PERIOD_TICKS = 1800;
+export const WIND_DURATION_TICKS = 300;
+export const WIND_SPEED = 2;
+export const WIND_WARN_TICKS = 120;
 
 export const EPS = 1e-9;

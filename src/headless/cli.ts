@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Tuning } from '../core/types.js';
+import { MAPS } from '../core/maps.js';
 import { runHeadless } from './runner.js';
 import { InputError, parseInputs, parseScenario } from './validate.js';
 
@@ -30,13 +31,13 @@ function parseArgs(argv: string[]) {
   };
   const seed = int('seed', true, -2147483648)!;
   const night = int('night', true, 1)!;
-  if (night !== 1) throw new ArgError(`--night ${night} chưa được hỗ trợ (chỉ có Đêm 1)`);
+  if (night < 1 || night > 3) throw new ArgError(`--night phải là 1, 2 hoặc 3`);
   const ticks = int('ticks', true, 0)!;
   const snapshotEvery = int('snapshot-every', false, 1) ?? 10;
   if (!a.out) throw new ArgError('Thiếu --out');
   const known = new Set(['seed', 'night', 'ticks', 'snapshot-every', 'out', 'scenario', 'inputs']);
   for (const k of Object.keys(a)) if (!known.has(k)) throw new ArgError(`Tham số không biết: --${k}`);
-  return { seed, ticks, snapshotEvery, out: a.out, scenario: a.scenario, inputs: a.inputs };
+  return { seed, night, ticks, snapshotEvery, out: a.out, scenario: a.scenario, inputs: a.inputs };
 }
 
 function readJson(path: string, what: string): unknown {
@@ -58,9 +59,10 @@ function main() {
   const contract = JSON.parse(readFileSync(resolve(here, '../../game.contract.json'), 'utf8'));
   const tuning = contract.tuning as Tuning;
   const args = parseArgs(process.argv.slice(2));
-  const scenario = args.scenario ? parseScenario(readJson(args.scenario, 'scenario'), tuning.lantern_count_night1) : undefined;
+  const lanternCount = MAPS[args.night].lanterns.length;
+  const scenario = args.scenario ? parseScenario(readJson(args.scenario, 'scenario'), lanternCount) : undefined;
   const frames = args.inputs ? parseInputs(readJson(args.inputs, 'inputs')) : undefined;
-  const lines = runHeadless({ tuning, seed: args.seed, scenario, frames, ticks: args.ticks, snapshotEvery: args.snapshotEvery });
+  const lines = runHeadless({ tuning, seed: args.seed, night: args.night, scenario, frames, ticks: args.ticks, snapshotEvery: args.snapshotEvery });
   writeFileSync(args.out, lines.join('\n') + '\n');
 }
 

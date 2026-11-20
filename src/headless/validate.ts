@@ -1,7 +1,10 @@
-// Kiểm tra file scenario / inputs. Sai định dạng -> InputError (CLI thoát mã 2).
-import type { Scenario, Vec3 } from '../core/types.js';
+// Kiểm tra file scenario / inputs (Contract v1.1). Sai định dạng -> InputError (CLI thoát mã 2).
+import type { Scenario, Vec3, ShadeState, DrifterState } from '../core/types.js';
 
 export class InputError extends Error {}
+
+const SHADE_STATES: ShadeState[] = ['spawning', 'wander', 'chase', 'recoil', 'stunned'];
+const DRIFTER_STATES: DrifterState[] = ['idle', 'chase', 'flee', 'removed'];
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
@@ -18,6 +21,19 @@ function int(v: unknown, where: string, min = 0): number {
   if (!isNum(v) || !Number.isInteger(v) || v < min) throw new InputError(`${where}: cần số nguyên >= ${min}`);
   return v;
 }
+function arr(v: unknown, where: string): unknown[] {
+  if (!Array.isArray(v)) throw new InputError(`${where}: cần mảng`);
+  return v;
+}
+function uniqueId(v: unknown, ids: Set<string>, where: string): string {
+  if (typeof v !== 'string' || v === '' || ids.has(v)) throw new InputError(`${where}: cần chuỗi không trùng`);
+  ids.add(v);
+  return v;
+}
+function oneOf<T extends string>(v: unknown, list: T[], where: string): T {
+  if (!list.includes(v as T)) throw new InputError(`${where}: phải là ${list.join('/')}`);
+  return v as T;
+}
 
 export function parseScenario(raw: unknown, lanternCount: number): Scenario {
   if (!isObj(raw)) throw new InputError('scenario: cần một object JSON');
@@ -29,37 +45,62 @@ export function parseScenario(raw: unknown, lanternCount: number): Scenario {
     if (p.pos !== undefined) sc.player.pos = vec3(p.pos, 'scenario.player.pos');
     if (p.carried !== undefined) sc.player.carried = int(p.carried, 'scenario.player.carried');
     if (p.flames !== undefined) sc.player.flames = int(p.flames, 'scenario.player.flames', 1);
+    for (const k of ['invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks'] as const) {
+      if (p[k] !== undefined) sc.player[k] = int(p[k], `scenario.player.${k}`);
+    }
   }
-  if (raw.random_motes !== undefined) sc.random_motes = bool(raw.random_motes, 'scenario.random_motes');
-  if (raw.random_shades !== undefined) sc.random_shades = bool(raw.random_shades, 'scenario.random_shades');
+  for (const k of ['random_motes', 'random_shades', 'random_drifters', 'wind_enabled'] as const) {
+    if (raw[k] !== undefined) sc[k] = bool(raw[k], `scenario.${k}`);
+  }
   if (raw.motes !== undefined) {
-    if (!Array.isArray(raw.motes)) throw new InputError('scenario.motes: cần mảng');
-    sc.motes = raw.motes.map((m, i) => vec3(isObj(m) ? m.pos : m, `scenario.motes[${i}]`));
+    sc.motes = arr(raw.motes, 'scenario.motes').map((m, i) => vec3(isObj(m) ? m.pos : m, `scenario.motes[${i}]`));
   }
   if (raw.shades !== undefined) {
-    if (!Array.isArray(raw.shades)) throw new InputError('scenario.shades: cần mảng');
     const ids = new Set<string>();
-    sc.shades = raw.shades.map((s, i) => {
-      if (!isObj(s)) throw new InputError(`scenario.shades[${i}]: cần object`);
-      const out: { id?: string; pos: Vec3 } = { pos: vec3(s.pos, `scenario.shades[${i}].pos`) };
-      if (s.id !== undefined) {
-        if (typeof s.id !== 'string' || s.id === '' || ids.has(s.id)) throw new InputError(`scenario.shades[${i}].id: cần chuỗi không trùng`);
-        ids.add(s.id);
-        out.id = s.id;
-      }
+    sc.shades = arr(raw.shades, 'scenario.shades').map((s, i) => {
+      const w = `scenario.shades[${i}]`;
+      if (!isObj(s)) throw new InputError(`${w}: cần object`);
+      const out: NonNullable<Scenario['shades']>[number] = { pos: vec3(s.pos, `${w}.pos`) };
+      if (s.id !== undefined) out.id = uniqueId(s.id, ids, `${w}.id`);
+      if (s.state !== undefined) out.state = oneOf(s.state, SHADE_STATES, `${w}.state`);
+      if (s.state_ticks_left !== undefined) out.state_ticks_left = int(s.state_ticks_left, `${w}.state_ticks_left`);
+      return out;
+    });
+  }
+  if (raw.drifters !== undefined) {
+    const ids = new Set<string>();
+    sc.drifters = arr(raw.drifters, 'scenario.drifters').map((d, i) => {
+      const w = `scenario.drifters[${i}]`;
+      if (!isObj(d)) throw new InputError(`${w}: cần object`);
+      const out: NonNullable<Scenario['drifters']>[number] = { pos: vec3(d.pos, `${w}.pos`) };
+      if (d.id !== undefined) out.id = uniqueId(d.id, ids, `${w}.id`);
+      if (d.state !== undefined) out.state = oneOf(d.state, DRIFTER_STATES, `${w}.state`);
+      if (d.stolen !== undefined) out.stolen = int(d.stolen, `${w}.stolen`);
+      return out;
+    });
+  }
+  if (raw.charms !== undefined) {
+    const ids = new Set<string>();
+    sc.charms = arr(raw.charms, 'scenario.charms').map((c, i) => {
+      const w = `scenario.charms[${i}]`;
+      if (!isObj(c)) throw new InputError(`${w}: cần object`);
+      const out: NonNullable<Scenario['charms']>[number] = {};
+      if (c.id !== undefined) out.id = uniqueId(c.id, ids, `${w}.id`);
+      if (c.pos !== undefined) out.pos = vec3(c.pos, `${w}.pos`);
+      if (c.available !== undefined) out.available = bool(c.available, `${w}.available`);
       return out;
     });
   }
   if (raw.lanterns !== undefined) {
-    if (!Array.isArray(raw.lanterns)) throw new InputError('scenario.lanterns: cần mảng');
-    sc.lanterns = raw.lanterns.map((l, i) => {
-      if (!isObj(l)) throw new InputError(`scenario.lanterns[${i}]: cần object`);
+    sc.lanterns = arr(raw.lanterns, 'scenario.lanterns').map((l, i) => {
+      const w = `scenario.lanterns[${i}]`;
+      if (!isObj(l)) throw new InputError(`${w}: cần object`);
       const n = typeof l.id === 'string' ? /^L(\d+)$/.exec(l.id) : null;
-      if (!n || +n[1] < 1 || +n[1] > lanternCount) throw new InputError(`scenario.lanterns[${i}].id: phải là L1..L${lanternCount}`);
-      const out: { id: string; pos?: Vec3; lit?: boolean; deposited?: number } = { id: l.id as string };
-      if (l.pos !== undefined) out.pos = vec3(l.pos, `scenario.lanterns[${i}].pos`);
-      if (l.lit !== undefined) out.lit = bool(l.lit, `scenario.lanterns[${i}].lit`);
-      if (l.deposited !== undefined) out.deposited = int(l.deposited, `scenario.lanterns[${i}].deposited`);
+      if (!n || +n[1] < 1 || +n[1] > lanternCount) throw new InputError(`${w}.id: phải là L1..L${lanternCount}`);
+      const out: NonNullable<Scenario['lanterns']>[number] = { id: l.id as string };
+      if (l.pos !== undefined) out.pos = vec3(l.pos, `${w}.pos`);
+      if (l.lit !== undefined) out.lit = bool(l.lit, `${w}.lit`);
+      if (l.deposited !== undefined) out.deposited = int(l.deposited, `${w}.deposited`);
       return out;
     });
   }
@@ -78,6 +119,7 @@ export interface Frame {
   interact?: boolean;
   pulse?: boolean;
   dash?: boolean;
+  pause?: boolean;
 }
 
 export function parseInputs(raw: unknown): Frame[] {
@@ -100,7 +142,7 @@ export function parseInputs(raw: unknown): Frame[] {
       if (!isNum(f.cam_yaw_deg)) throw new InputError(`${w}.cam_yaw_deg: cần số`);
       out.cam_yaw_deg = f.cam_yaw_deg;
     }
-    for (const k of ['jump', 'interact', 'pulse', 'dash'] as const) {
+    for (const k of ['jump', 'interact', 'pulse', 'dash', 'pause'] as const) {
       if (f[k] !== undefined) out[k] = bool(f[k], `${w}.${k}`);
     }
     return out;
