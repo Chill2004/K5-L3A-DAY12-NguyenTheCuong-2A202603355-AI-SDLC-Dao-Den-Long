@@ -1,0 +1,64 @@
+{
+  "requirement": "P2 Lướt: 14 m/s, 0.2 s, hồi chiêu 1.5 s; hướng mặt khi đứng yên; event dash",
+  "seed": 1,
+  "ticks": 130,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "dash",
+        "data": {}
+      },
+      {
+        "tick": 101,
+        "name": "dash"
+      }
+    ],
+    "event_count": {
+      "dash": 2
+    },
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "player": {
+            "vel": [
+              0,
+              0,
+              14
+            ]
+          }
+        }
+      },
+      {
+        "tick": 20,
+        "match": {
+          "player": {
+            "pos": [
+              0,
+              0,
+              2.8
+            ],
+            "dash_cd_s": 1.183
+          }
+        }
+      },
+      {
+        "tick": 120,
+        "match": {
+          "player": {
+            "pos": [
+              0,
+              0,
+              5.6
+            ]
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 130
+    }
+  }
+}

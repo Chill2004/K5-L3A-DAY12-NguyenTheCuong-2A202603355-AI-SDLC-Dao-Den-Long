@@ -1,0 +1,36 @@
+{
+  "requirement": "P2 Đêm 3: dốc 30° từ r=30 (Y=0) lên r=24 (Y=3), tới tầng 1",
+  "seed": 1,
+  "night": 3,
+  "ticks": 120,
+  "snapshot_every": 40,
+  "expect": {
+    "snapshots": [
+      {
+        "tick": 40,
+        "match": {
+          "player": {
+            "pos": [
+              23.382,
+              1.5,
+              13.5
+            ]
+          }
+        }
+      },
+      {
+        "tick": 120,
+        "match": {
+          "player": {
+            "pos": [
+              16.454,
+              3,
+              9.5
+            ],
+            "grounded": true
+          }
+        }
+      }
+    ]
+  }
+}

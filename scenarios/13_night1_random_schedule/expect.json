@@ -1,0 +1,113 @@
+{
+  "requirement": "Đêm 1 chuẩn: 20 đom đóm, sinh thêm mỗi 240 tick tới hết 24 điểm; Bóng Mực tick 300 (2 con) rồi mỗi 480 tick, tối đa 6",
+  "seed": 42,
+  "ticks": 3500,
+  "snapshot_every": 60,
+  "expect": {
+    "snapshots": [
+      {
+        "tick": 0,
+        "match": {
+          "night": 1,
+          "motes_active": 20,
+          "shades": [],
+          "drifters": [],
+          "charms": [],
+          "wind": {
+            "active": false
+          }
+        }
+      },
+      {
+        "tick": 240,
+        "match": {
+          "motes_active": 21
+        }
+      },
+      {
+        "tick": 960,
+        "match": {
+          "motes_active": 24
+        }
+      },
+      {
+        "tick": 1200,
+        "match": {
+          "motes_active": 24
+        }
+      },
+      {
+        "tick": 300,
+        "match": {
+          "shades": [
+            {
+              "id": "S1",
+              "state": "spawning"
+            },
+            {
+              "id": "S2",
+              "state": "spawning"
+            }
+          ]
+        }
+      }
+    ],
+    "events": [
+      {
+        "tick": 0,
+        "name": "night_start",
+        "data": {
+          "night": 1
+        }
+      },
+      {
+        "tick": 300,
+        "name": "shade_spawned",
+        "data": {
+          "id": "S1"
+        }
+      },
+      {
+        "tick": 300,
+        "name": "shade_spawned",
+        "data": {
+          "id": "S2"
+        }
+      },
+      {
+        "tick": 780,
+        "name": "shade_spawned",
+        "data": {
+          "id": "S3"
+        }
+      },
+      {
+        "tick": 1260,
+        "name": "shade_spawned",
+        "data": {
+          "id": "S4"
+        }
+      },
+      {
+        "tick": 1740,
+        "name": "shade_spawned",
+        "data": {
+          "id": "S5"
+        }
+      },
+      {
+        "tick": 2220,
+        "name": "shade_spawned",
+        "data": {
+          "id": "S6"
+        }
+      }
+    ],
+    "event_count": {
+      "shade_spawned": 6
+    },
+    "end": {
+      "ticks": 3500
+    }
+  }
+}

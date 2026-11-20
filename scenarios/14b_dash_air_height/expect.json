@@ -1,0 +1,76 @@
+{
+  "requirement": "P2 lướt trên không giữ nguyên độ cao; hướng = hướng đang di chuyển (+X)",
+  "seed": 1,
+  "ticks": 40,
+  "snapshot_every": 5,
+  "expect": {
+    "snapshots": [
+      {
+        "tick": 5,
+        "match": {
+          "player": {
+            "pos": [
+              0.5,
+              0.5,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "tick": 10,
+        "match": {
+          "player": {
+            "pos": [
+              {
+                "$gt": 1.6
+              },
+              0.5,
+              0
+            ],
+            "vel": [
+              14,
+              0,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "tick": 15,
+        "match": {
+          "player": {
+            "pos": [
+              {
+                "$gt": 2.7
+              },
+              0.5,
+              0
+            ]
+          }
+        }
+      },
+      {
+        "tick": 40,
+        "match": {
+          "player": {
+            "pos": [
+              {
+                "$gt": 3
+              },
+              0,
+              0
+            ],
+            "grounded": true
+          }
+        }
+      }
+    ],
+    "events": [
+      {
+        "tick": 6,
+        "name": "dash"
+      }
+    ]
+  }
+}

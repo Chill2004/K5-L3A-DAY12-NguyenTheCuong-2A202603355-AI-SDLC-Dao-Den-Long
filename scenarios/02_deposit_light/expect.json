@@ -1,5 +1,5 @@
 {
-  "requirement": "R3 nạp trong interact_radius, đủ lantern_cost thì thắp; R9 per_lantern",
+  "requirement": "R3 nạp ở biên interact_radius 2.0; đủ 10 thì thắp; điểm 10/đom đóm nạp + 100/đèn = 200",
   "seed": 1,
   "ticks": 20,
   "snapshot_every": 10,
@@ -10,8 +10,8 @@
         "name": "deposit",
         "data": {
           "lantern_id": "L1",
-          "amount": 5,
-          "deposited": 5
+          "amount": 10,
+          "deposited": 10
         }
       },
       {
@@ -29,7 +29,7 @@
       {
         "tick": 10,
         "match": {
-          "score": 100,
+          "score": 200,
           "player": {
             "carried": 0
           },
@@ -37,7 +37,7 @@
             {
               "id": "L1",
               "lit": true,
-              "deposited": 5
+              "deposited": 10
             },
             {
               "lit": false
@@ -58,7 +58,7 @@
     "end": {
       "ticks": 20,
       "state": "playing",
-      "score": 100
+      "score": 200
     }
   }
 }

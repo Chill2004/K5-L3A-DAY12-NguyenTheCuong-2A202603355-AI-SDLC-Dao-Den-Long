@@ -1,5 +1,5 @@
 {
-  "requirement": "R1 tốc độ player_speed; yaw 90 biến z thành +X; vector [1,1] được chuẩn hóa",
+  "requirement": "R1 tốc độ 6 m/s; yaw 90 biến z thành +X; [1,1] chuẩn hóa",
   "seed": 1,
   "ticks": 130,
   "snapshot_every": 60,

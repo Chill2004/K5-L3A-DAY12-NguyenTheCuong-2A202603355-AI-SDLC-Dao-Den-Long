@@ -1,5 +1,5 @@
 {
-  "requirement": "R5 thắng khi đủ 5 đèn; đèn lit sẵn từ scenario không cộng điểm; điểm = 100 + floor(299.983)*1 + 3*50 = 549",
+  "requirement": "R5 thắng khi đủ đèn; điểm = 100 + 100 + 299*2 + 3*50 = 948",
   "seed": 1,
   "ticks": 600,
   "snapshot_every": 10,
@@ -32,7 +32,7 @@
     "end": {
       "ticks": 1,
       "state": "won",
-      "score": 549
+      "score": 948
     }
   }
 }

@@ -1,0 +1,27 @@
+{
+  "requirement": "P2 Đêm 3: mép tầng là vách đứng, không đi lên được",
+  "seed": 1,
+  "night": 3,
+  "ticks": 60,
+  "snapshot_every": 60,
+  "expect": {
+    "snapshots": [
+      {
+        "tick": 60,
+        "match": {
+          "night": 3,
+          "player": {
+            "pos": [
+              0,
+              0,
+              -8.05
+            ]
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 60
+    }
+  }
+}

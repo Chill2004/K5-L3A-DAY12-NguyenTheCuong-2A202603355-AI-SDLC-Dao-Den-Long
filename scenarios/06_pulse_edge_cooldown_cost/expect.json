@@ -1,0 +1,40 @@
+{
+  "requirement": "R4 kích hoạt khi false->true; hồi chiêu 180 tick; không đủ 3 đom đóm thì không kích hoạt",
+  "seed": 1,
+  "ticks": 700,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "pulse"
+      },
+      {
+        "tick": 201,
+        "name": "pulse"
+      },
+      {
+        "tick": 401,
+        "name": "pulse"
+      }
+    ],
+    "event_count": {
+      "pulse": 3
+    },
+    "snapshots": [
+      {
+        "tick": 700,
+        "match": {
+          "player": {
+            "carried": 0
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 700,
+      "state": "playing",
+      "score": 0
+    }
+  }
+}

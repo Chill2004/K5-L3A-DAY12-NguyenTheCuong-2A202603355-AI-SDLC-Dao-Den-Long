@@ -1,0 +1,95 @@
+{
+  "requirement": "P2 Tỏa Sáng với Gió Lạc: chase->flee không cướp; flee có đồ -> thả lại (drifter_drop), biến mất sau 120 tick",
+  "seed": 1,
+  "night": 2,
+  "ticks": 300,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "pulse",
+        "data": {
+          "stunned_ids": []
+        }
+      },
+      {
+        "tick": 1,
+        "name": "drifter_drop",
+        "data": {
+          "drifter_id": "D1",
+          "amount": 3
+        }
+      }
+    ],
+    "no_events": [
+      "drifter_steal"
+    ],
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "motes_active": 3,
+          "motes": [
+            {
+              "kind": "dropped"
+            },
+            {
+              "kind": "dropped"
+            },
+            {
+              "kind": "dropped"
+            }
+          ],
+          "drifters": [
+            {
+              "id": "D1",
+              "state": "flee",
+              "stolen": 0
+            },
+            {
+              "id": "D2",
+              "state": "flee",
+              "stolen": 0
+            }
+          ],
+          "player": {
+            "carried": 6,
+            "flames": 3
+          }
+        }
+      },
+      {
+        "tick": 130,
+        "match": {
+          "drifters": [
+            {
+              "id": "D1",
+              "state": "removed"
+            },
+            {
+              "id": "D2",
+              "state": "flee"
+            }
+          ]
+        }
+      },
+      {
+        "tick": 250,
+        "match": {
+          "drifters": [
+            {
+              "state": "removed"
+            },
+            {
+              "state": "removed"
+            }
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 300
+    }
+  }
+}

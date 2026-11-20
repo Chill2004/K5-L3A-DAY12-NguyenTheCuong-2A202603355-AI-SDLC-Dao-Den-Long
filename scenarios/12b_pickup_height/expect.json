@@ -1,0 +1,22 @@
+{
+  "requirement": "R2 chênh cao > 1.5 m thì không nhặt",
+  "seed": 1,
+  "ticks": 10,
+  "snapshot_every": 10,
+  "expect": {
+    "event_count": {
+      "mote_picked": 1
+    },
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "motes_active": 1,
+          "player": {
+            "carried": 1
+          }
+        }
+      }
+    ]
+  }
+}

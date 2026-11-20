@@ -6,14 +6,17 @@ import { checkOutput, loadScenarios } from '../scripts/scenario-lib.mjs';
 import { runHeadless } from '../src/headless/runner.js';
 import { parseInputs, parseScenario } from '../src/headless/validate.js';
 import type { Tuning } from '../src/core/types.js';
+import { MAPS } from '../src/core/maps.js';
 
 const tuning = JSON.parse(readFileSync('game.contract.json', 'utf8')).tuning as Tuning;
 
 function run(sc: any, seed = sc.spec.seed) {
+  const night = sc.spec.night ?? 1;
   return runHeadless({
     tuning,
     seed,
-    scenario: sc.scenario ? parseScenario(sc.scenario, 5) : undefined,
+    night,
+    scenario: sc.scenario ? parseScenario(sc.scenario, MAPS[night].lanterns.length) : undefined,
     frames: sc.inputs ? parseInputs(sc.inputs) : undefined,
     ticks: sc.spec.ticks,
     snapshotEvery: sc.spec.snapshot_every,

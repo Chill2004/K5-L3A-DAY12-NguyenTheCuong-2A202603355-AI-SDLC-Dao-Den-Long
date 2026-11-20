@@ -1,0 +1,54 @@
+{
+  "requirement": "P2 Gió Lạc sinh ở tick 1200, 2400... tối đa 2, id D1, D2",
+  "seed": 9,
+  "night": 2,
+  "ticks": 3700,
+  "snapshot_every": 100,
+  "expect": {
+    "snapshots": [
+      {
+        "tick": 1100,
+        "match": {
+          "drifters": []
+        }
+      },
+      {
+        "tick": 1200,
+        "match": {
+          "drifters": [
+            {
+              "id": "D1",
+              "state": "idle"
+            }
+          ]
+        }
+      },
+      {
+        "tick": 2400,
+        "match": {
+          "drifters": [
+            {
+              "id": "D1"
+            },
+            {
+              "id": "D2"
+            }
+          ]
+        }
+      },
+      {
+        "tick": 3600,
+        "match": {
+          "drifters": [
+            {
+              "id": "D1"
+            },
+            {
+              "id": "D2"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "requirement": "P2 Bùa Gió: nhặt như đom đóm, 600 tick, 7.2 m/s, lướt không hồi chiêu, xuất hiện lại sau 2700 tick",
+  "seed": 1,
+  "night": 2,
+  "ticks": 60,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "charm_picked",
+        "data": {
+          "charm_id": "C1",
+          "charm_ticks": 600
+        }
+      },
+      {
+        "tick": 21,
+        "name": "dash"
+      },
+      {
+        "tick": 41,
+        "name": "dash"
+      }
+    ],
+    "event_count": {
+      "dash": 2,
+      "charm_picked": 1
+    },
+    "snapshots": [
+      {
+        "tick": 0,
+        "match": {
+          "night": 2,
+          "charms": [
+            {
+              "id": "C1",
+              "available": true,
+              "respawn_s": 0
+            }
+          ]
+        }
+      },
+      {
+        "tick": 10,
+        "match": {
+          "player": {
+            "pos": [
+              33.82,
+              0,
+              0
+            ],
+            "charm_s": 9.85
+          },
+          "charms": [
+            {
+              "id": "C1",
+              "available": false,
+              "respawn_s": 44.85
+            }
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 60,
+      "state": "playing"
+    }
+  }
+}

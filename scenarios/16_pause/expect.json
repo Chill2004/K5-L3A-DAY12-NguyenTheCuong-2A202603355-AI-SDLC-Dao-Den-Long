@@ -1,0 +1,62 @@
+{
+  "requirement": "P2 tạm dừng: tick tăng, sim_tick/thời gian đứng yên, state paused; event paused/resumed",
+  "seed": 1,
+  "ticks": 60,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 11,
+        "name": "paused",
+        "data": {}
+      },
+      {
+        "tick": 31,
+        "name": "resumed",
+        "data": {}
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 20,
+        "match": {
+          "state": "paused",
+          "sim_tick": 10,
+          "time_left_s": 299.833,
+          "player": {
+            "pos": [
+              0,
+              0,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "tick": 30,
+        "match": {
+          "state": "paused",
+          "sim_tick": 10
+        }
+      },
+      {
+        "tick": 40,
+        "match": {
+          "state": "playing",
+          "sim_tick": 20,
+          "player": {
+            "pos": [
+              0,
+              0,
+              2
+            ]
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 60,
+      "state": "playing"
+    }
+  }
+}

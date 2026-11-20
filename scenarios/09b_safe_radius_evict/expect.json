@@ -1,0 +1,41 @@
+{
+  "requirement": "R4 bóng ở trong lúc đèn vừa thắp bị đẩy ra mép trong 30 tick, không gây sát thương",
+  "seed": 1,
+  "ticks": 300,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "lantern_lit",
+        "data": {
+          "lantern_id": "L1"
+        }
+      }
+    ],
+    "no_events": [
+      "player_hit"
+    ],
+    "snapshots": [
+      {
+        "tick": 30,
+        "match": {
+          "shades": [
+            {
+              "id": "S1",
+              "pos": [
+                0,
+                1,
+                -4.5
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 300,
+      "state": "playing"
+    }
+  }
+}

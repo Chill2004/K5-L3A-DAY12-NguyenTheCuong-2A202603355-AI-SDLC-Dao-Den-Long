@@ -1,5 +1,5 @@
 {
-  "requirement": "R1 nhảy rồi về mặt đất Y=0; giữ nút không nhảy lại",
+  "requirement": "R1 nhảy 7 m/s, trọng lực 20; về Y=0; giữ nút không nhảy lại",
   "seed": 1,
   "ticks": 120,
   "snapshot_every": 10,
@@ -15,7 +15,8 @@
                 "$gt": 0.5
               },
               0
-            ]
+            ],
+            "grounded": false
           }
         }
       },
@@ -27,7 +28,8 @@
               0,
               0,
               0
-            ]
+            ],
+            "grounded": true
           }
         }
       },

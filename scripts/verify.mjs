@@ -22,7 +22,7 @@ let failed = 0;
 
 for (const sc of loadScenarios('scenarios')) {
   const s = sc.spec;
-  const args = ['--seed', String(s.seed), '--night', '1', '--ticks', String(s.ticks), '--snapshot-every', String(s.snapshot_every ?? 10)];
+  const args = ['--seed', String(s.seed), '--night', String(s.night ?? 1),'--ticks', String(s.ticks), '--snapshot-every', String(s.snapshot_every ?? 10)];
   if (sc.scenarioPath) args.push('--scenario', sc.scenarioPath);
   if (sc.inputsPath) args.push('--inputs', sc.inputsPath);
   const outA = join(outDir, `${sc.name}.jsonl`);

@@ -1,0 +1,33 @@
+{
+  "requirement": "R4 Bóng Mực ngoài vùng bị chặn ở mép 6 m của đèn đã sáng",
+  "seed": 1,
+  "ticks": 600,
+  "snapshot_every": 100,
+  "expect": {
+    "no_events": [
+      "player_hit",
+      "game_over"
+    ],
+    "snapshots": [
+      {
+        "tick": 600,
+        "match": {
+          "shades": [
+            {
+              "pos": [
+                6,
+                1,
+                0
+              ],
+              "state": "chase"
+            }
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 600,
+      "state": "playing"
+    }
+  }
+}

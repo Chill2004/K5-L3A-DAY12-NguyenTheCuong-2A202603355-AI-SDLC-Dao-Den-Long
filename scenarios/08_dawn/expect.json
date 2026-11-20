@@ -1,5 +1,5 @@
 {
-  "requirement": "R5 hết giờ thì thua dawn; time_left_s = thời lượng - bước/60",
+  "requirement": "R5 hết giờ thì thua dawn",
   "seed": 1,
   "ticks": 600,
   "snapshot_every": 30,

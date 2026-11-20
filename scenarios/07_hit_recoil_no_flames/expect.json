@@ -1,0 +1,90 @@
+{
+  "requirement": "R4/R5 chạm XZ<=1: -1 lửa, rơi floor(n/2) đom đóm (vành 1.5-2.5 m, ttl 480), bất tử 90 tick, bóng recoil; hết lửa thua",
+  "seed": 1,
+  "ticks": 1000,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 31,
+        "name": "player_hit",
+        "data": {
+          "by": "shade",
+          "flames": 2,
+          "dropped": 2
+        }
+      },
+      {
+        "tick": 121,
+        "name": "player_hit",
+        "data": {
+          "by": "shade",
+          "flames": 1,
+          "dropped": 1
+        }
+      },
+      {
+        "tick": 211,
+        "name": "player_hit",
+        "data": {
+          "by": "shade",
+          "flames": 0,
+          "dropped": 0
+        }
+      },
+      {
+        "tick": 211,
+        "name": "game_over",
+        "data": {
+          "result": "lost",
+          "reason": "no_flames"
+        }
+      }
+    ],
+    "event_count": {
+      "player_hit": 3
+    },
+    "snapshots": [
+      {
+        "tick": 40,
+        "match": {
+          "motes_active": 2,
+          "motes": [
+            {
+              "kind": "dropped",
+              "ttl_s": 7.85
+            },
+            {
+              "kind": "dropped",
+              "ttl_s": 7.85
+            }
+          ],
+          "player": {
+            "invuln": true,
+            "carried": 2
+          },
+          "shades": [
+            {
+              "state": "recoil"
+            }
+          ]
+        }
+      },
+      {
+        "tick": 100,
+        "match": {
+          "shades": [
+            {
+              "state": "chase"
+            }
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 211,
+      "state": "lost",
+      "score": 0
+    }
+  }
+}

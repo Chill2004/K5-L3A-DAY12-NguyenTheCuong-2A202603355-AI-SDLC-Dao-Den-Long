@@ -1,0 +1,53 @@
+{
+  "requirement": "P2 Đêm 3 gió mạnh: mỗi 30 s một cơn 5 s, đẩy người chơi 2 m/s",
+  "seed": 5,
+  "night": 3,
+  "ticks": 2200,
+  "snapshot_every": 10,
+  "expect": {
+    "snapshots": [
+      {
+        "tick": 1790,
+        "match": {
+          "wind": {
+            "active": false
+          },
+          "player": {
+            "pos": [
+              0,
+              0,
+              -30
+            ]
+          }
+        }
+      },
+      {
+        "tick": 1800,
+        "match": {
+          "wind": {
+            "active": true
+          }
+        }
+      },
+      {
+        "tick": 2090,
+        "match": {
+          "wind": {
+            "active": true
+          }
+        }
+      },
+      {
+        "tick": 2100,
+        "match": {
+          "wind": {
+            "active": false
+          }
+        }
+      }
+    ],
+    "no_events": [
+      "player_hit"
+    ]
+  }
+}

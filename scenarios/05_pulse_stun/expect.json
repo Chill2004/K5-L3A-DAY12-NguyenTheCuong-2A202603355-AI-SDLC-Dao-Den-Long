@@ -1,5 +1,5 @@
 {
-  "requirement": "R4 pulse: trong pulse_radius bị stunned pulse_stun_s (180 tick), đẩy pulse_push_m, tốn pulse_cost; per_stun",
+  "requirement": "R4 Tỏa Sáng: tốn 3, bán kính 5 m (3D), choáng 120 tick, đẩy 4 m trong 15 tick, +5 điểm, hồi chiêu 3 s",
   "seed": 1,
   "ticks": 200,
   "snapshot_every": 10,
@@ -17,37 +17,52 @@
     ],
     "snapshots": [
       {
+        "tick": 0,
+        "match": {
+          "shades": [
+            {
+              "id": "S1",
+              "state": "chase"
+            },
+            {
+              "id": "far",
+              "state": "wander"
+            }
+          ]
+        }
+      },
+      {
         "tick": 10,
         "match": {
-          "score": 25,
+          "score": 5,
           "player": {
-            "carried": 1
+            "carried": 0,
+            "pulse_cd_s": 2.85
           },
           "shades": [
             {
               "id": "S1",
               "pos": [
-                9,
+                6.667,
                 1,
                 0
               ],
               "state": "stunned"
             },
             {
-              "id": "far",
-              "state": "chase"
+              "id": "far"
             }
           ]
         }
       },
       {
-        "tick": 180,
+        "tick": 120,
         "match": {
           "shades": [
             {
               "id": "S1",
               "pos": [
-                9,
+                8,
                 1,
                 0
               ],
@@ -58,11 +73,16 @@
         }
       },
       {
-        "tick": 190,
+        "tick": 130,
         "match": {
           "shades": [
             {
               "id": "S1",
+              "pos": [
+                7.333,
+                1,
+                0
+              ],
               "state": "chase"
             },
             {}
@@ -73,7 +93,7 @@
     "end": {
       "ticks": 200,
       "state": "playing",
-      "score": 25
+      "score": 5
     }
   }
 }

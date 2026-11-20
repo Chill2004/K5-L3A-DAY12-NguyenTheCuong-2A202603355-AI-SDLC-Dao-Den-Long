@@ -66,13 +66,22 @@ export function checkOutput(text, spec) {
   if (!snaps.length || snaps[0].tick !== 0) errs.push('thiếu snapshot tick 0');
   for (const s of snaps) if (s.tick % every !== 0) errs.push(`snapshot tick ${s.tick} không chia hết ${every}`);
   for (const o of objs) if (!['snapshot', 'event', 'end'].includes(o.type)) errs.push(`type lạ: ${o.type}`);
-  const names = ['mote_picked', 'deposit', 'lantern_lit', 'pulse', 'player_hit', 'shade_spawned', 'game_over'];
+  const names = ['mote_picked', 'deposit', 'lantern_lit', 'pulse', 'player_hit', 'shade_spawned', 'game_over',
+    'dash', 'charm_picked', 'drifter_steal', 'drifter_drop', 'night_start', 'paused', 'resumed'];
   for (const e of events) if (!names.includes(e.name)) errs.push(`event lạ: ${e.name}`);
+  const shadeStates = ['spawning', 'wander', 'chase', 'recoil', 'stunned'];
   for (const s of snaps) {
-    for (const k of ['tick', 'sim_tick', 'state', 'time_left_s', 'score', 'player', 'lanterns', 'shades', 'motes_active']) {
+    for (const k of ['tick', 'sim_tick', 'night', 'state', 'time_left_s', 'score', 'wind', 'player', 'lanterns', 'shades',
+      'motes_active', 'motes', 'drifters', 'charms']) {
       if (!(k in s)) errs.push(`snapshot tick ${s.tick} thiếu ${k}`);
     }
+    for (const k of ['pos', 'vel', 'grounded', 'flames', 'carried', 'invuln', 'dash_cd_s', 'pulse_cd_s', 'charm_s']) {
+      if (s.player && !(k in s.player)) errs.push(`snapshot tick ${s.tick} player thiếu ${k}`);
+    }
+    for (const sh of s.shades ?? []) if (!shadeStates.includes(sh.state)) errs.push(`trạng thái Bóng Mực lạ: ${sh.state}`);
+    if (!['playing', 'paused', 'won', 'lost'].includes(s.state)) errs.push(`state lạ: ${s.state}`);
   }
+  if (events[0]?.name !== 'night_start') errs.push('event đầu tiên phải là night_start');
   const go = events.filter((e) => e.name === 'game_over');
   if (end.state !== 'playing' && go.length !== 1) errs.push('kết thúc nhưng không có đúng 1 game_over');
 

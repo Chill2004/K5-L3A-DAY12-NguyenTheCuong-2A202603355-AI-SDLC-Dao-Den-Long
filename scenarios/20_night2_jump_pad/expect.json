@@ -1,0 +1,59 @@
+{
+  "requirement": "P2 Đêm 2 bục nhảy: vy 14, ngang 24 m/s về tâm đảo kia, bay ~1.4 s, đáp trong đảo đích; cầu tre nối hai đảo",
+  "seed": 1,
+  "night": 2,
+  "ticks": 120,
+  "snapshot_every": 10,
+  "expect": {
+    "no_events": [
+      "player_hit"
+    ],
+    "snapshots": [
+      {
+        "tick": 40,
+        "match": {
+          "player": {
+            "pos": [
+              {
+                "$gte": 34,
+                "$lte": 36
+              },
+              {
+                "$gte": 4.7,
+                "$lte": 4.8
+              },
+              {
+                "$gte": 12,
+                "$lte": 13
+              }
+            ],
+            "grounded": false
+          }
+        }
+      },
+      {
+        "tick": 100,
+        "match": {
+          "player": {
+            "pos": [
+              {
+                "$gte": 51.2,
+                "$lte": 51.7
+              },
+              0,
+              {
+                "$gte": 6.5,
+                "$lte": 6.8
+              }
+            ],
+            "grounded": true
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 120,
+      "state": "playing"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "requirement": "P2 rơi khi còn 1 lửa thì thua ngay, không hồi sinh",
+  "seed": 1,
+  "ticks": 300,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 66,
+        "name": "player_hit",
+        "data": {
+          "by": "fall",
+          "flames": 0
+        }
+      },
+      {
+        "tick": 66,
+        "name": "game_over",
+        "data": {
+          "result": "lost",
+          "reason": "no_flames"
+        }
+      }
+    ],
+    "end": {
+      "ticks": 66,
+      "state": "lost"
+    }
+  }
+}

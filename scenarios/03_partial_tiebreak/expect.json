@@ -1,0 +1,46 @@
+{
+  "requirement": "R3 nạp một phần, đèn nhớ tiến độ; hai đèn cách đều thì chọn id nhỏ hơn",
+  "seed": 1,
+  "ticks": 30,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "deposit",
+        "data": {
+          "lantern_id": "L1",
+          "amount": 3,
+          "deposited": 4
+        }
+      }
+    ],
+    "event_count": {
+      "deposit": 1,
+      "lantern_lit": 0
+    },
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "lanterns": [
+            {
+              "deposited": 4
+            },
+            {
+              "deposited": 0
+            },
+            {},
+            {},
+            {}
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 30,
+      "state": "playing",
+      "score": 30
+    }
+  }
+}
