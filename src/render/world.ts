@@ -12,7 +12,10 @@ export const PAL = {
   gold: '#F2C14E', drifter: '#8FA3B8', danger: '#FF5A5F', text: '#F5F1E6',
 };
 
-const std = (color: string, extra: THREE.MeshStandardMaterialParameters = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.9, ...extra });
+const MAX_INST_MOTES = 160;
+const MAX_INST_SHADES = 256;
+// Lambert rẻ hơn PBR nhiều trên iGPU; đủ cho phong cách đơn giản của game.
+const std = (color: string, extra: THREE.MeshLambertMaterialParameters = {}) => new THREE.MeshLambertMaterial({ color, ...extra });
 
 export class World {
   renderer: THREE.WebGLRenderer;
@@ -22,8 +25,17 @@ export class World {
   private mapGroup = new THREE.Group();
   private lanterns: { glass: THREE.Mesh; light: THREE.PointLight; halo: THREE.Mesh; bar: THREE.Mesh; barBg: THREE.Mesh; rip: THREE.Mesh }[] = [];
   private charms: THREE.Group[] = [];
-  private motes = new Map<string, THREE.Group>();
-  private shades = new Map<string, THREE.Group>();
+  private moteCoreI!: THREE.InstancedMesh;
+  private moteHaloI!: THREE.InstancedMesh;
+  private shadeBodyI!: THREE.InstancedMesh;
+  private shadeRimI!: THREE.InstancedMesh;
+  private tmpM = new THREE.Matrix4();
+  private tmpP = new THREE.Vector3();
+  private tmpS = new THREE.Vector3();
+  private tmpQ = new THREE.Quaternion();
+  private colBody = new THREE.Color(PAL.shadeBody);
+  private colStun = new THREE.Color(PAL.shadeStun);
+  private seen = new Set<string>();
   private drifters = new Map<string, THREE.Mesh>();
   private may = new THREE.Group();
   private orbit: THREE.Mesh[] = [];
@@ -32,7 +44,7 @@ export class World {
   private pulseT = 1;
   private geo = {
     moteCore: new THREE.SphereGeometry(0.13, 8, 6), moteHalo: new THREE.SphereGeometry(0.3, 8, 6),
-    shade: new THREE.SphereGeometry(0.8, 16, 12), shadeRim: new THREE.SphereGeometry(0.88, 16, 12),
+    shade: new THREE.SphereGeometry(0.8, 12, 8), shadeRim: new THREE.SphereGeometry(0.88, 12, 8),
     drifter: new THREE.BoxGeometry(0.35, 0.06, 1.8),
   };
   private mat = {
@@ -40,13 +52,15 @@ export class World {
     moteHalo: new THREE.MeshBasicMaterial({ color: PAL.moteHalo, transparent: true, opacity: 0.35, depthWrite: false }),
     dropped: new THREE.MeshBasicMaterial({ color: PAL.moteHalo, transparent: true, opacity: 0.6, depthWrite: false }),
     shade: std(PAL.shadeBody), shadeStun: std(PAL.shadeStun),
-    shadeRim: new THREE.MeshBasicMaterial({ color: PAL.shadeRim, side: THREE.BackSide, transparent: true, opacity: 0.8 }),
+    // Viền đục (không blending): hàng trăm bóng chồng lên nhau không gây overdraw trong suốt
+    shadeRim: new THREE.MeshBasicMaterial({ color: PAL.shadeRim, side: THREE.BackSide }),
     drifter: std(PAL.drifter, { emissive: PAL.drifter, emissiveIntensity: 0.35, side: THREE.DoubleSide }),
   };
 
   constructor(container: HTMLElement) {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+    // Vẽ đúng độ phân giải cửa sổ (1280x720 ở bench); màn hình HiDPI không nhân thêm số điểm ảnh.
+    this.renderer.setPixelRatio(1);
     container.appendChild(this.renderer.domElement);
     this.scene.background = new THREE.Color(PAL.sky);
     this.scene.fog = new THREE.Fog(PAL.fog, 25, 110);
@@ -74,6 +88,18 @@ export class World {
     this.leaves = new THREE.Points(lg, new THREE.PointsMaterial({ color: '#7fae6a', size: 0.25 }));
     this.leaves.visible = false;
     this.scene.add(this.leaves);
+    const inst = (geo: THREE.BufferGeometry, mat: THREE.Material, n: number) => {
+      const m = new THREE.InstancedMesh(geo, mat, n);
+      m.count = 0;
+      m.frustumCulled = false;
+      this.scene.add(m);
+      return m;
+    };
+    this.moteCoreI = inst(this.geo.moteCore, this.mat.moteCore, MAX_INST_MOTES);
+    this.moteHaloI = inst(this.geo.moteHalo, this.mat.moteHalo, MAX_INST_MOTES);
+    this.shadeBodyI = inst(this.geo.shade, std('#ffffff'), MAX_INST_SHADES);
+    this.shadeRimI = inst(this.geo.shadeRim, this.mat.shadeRim, MAX_INST_SHADES);
+    this.shadeBodyI.setColorAt(0, this.colBody);
     this.resize();
   }
 
@@ -104,10 +130,8 @@ export class World {
   /** Dựng lại bản đồ cho Đêm của game g. */
   build(g: Game) {
     for (const c of [...this.mapGroup.children]) this.mapGroup.remove(c);
-    for (const m of this.motes.values()) this.scene.remove(m);
-    for (const s of this.shades.values()) this.scene.remove(s);
     for (const d of this.drifters.values()) this.scene.remove(d);
-    this.motes.clear(); this.shades.clear(); this.drifters.clear();
+    this.drifters.clear();
     this.lanterns = []; this.charms = [];
     const add = (o: THREE.Object3D) => this.mapGroup.add(o);
     const island = (x: number, z: number, r: number) => {
@@ -204,7 +228,7 @@ export class World {
     this.pulseRing.position.set(g.player.pos[0], g.player.pos[1] + 0.1, g.player.pos[2]);
   }
 
-  sync(g: Game, t: number, camYaw: number, facingYaw: number) {
+  sync(g: Game, t: number, camYaw: number, facingYaw: number, freeCamera = false) {
     const p = g.player;
     this.may.position.set(p.pos[0], p.pos[1], p.pos[2]);
     this.may.rotation.y = facingYaw;
@@ -218,7 +242,7 @@ export class World {
       if (!v) return;
       const weak = l.lit && l.fuel < low;
       const on = l.lit && !(weak && blinkOff);
-      const m = v.glass.material as THREE.MeshStandardMaterial;
+      const m = v.glass.material as THREE.MeshLambertMaterial;
       m.color.set(l.lit ? PAL.lampOn : PAL.lampOff);
       m.emissive.set(on ? PAL.lampCore : '#000000');
       m.emissiveIntensity = on ? 1 : 0;
@@ -243,40 +267,39 @@ export class World {
       v.position.y = c.pos[1] + 1 + 0.15 * Math.sin(t / 300);
     });
 
-    const seen = new Set<string>();
-    for (const m of g.motes) {
-      seen.add(m.id);
-      let v = this.motes.get(m.id);
-      if (!v) {
-        v = new THREE.Group();
-        v.add(new THREE.Mesh(this.geo.moteCore, this.mat.moteCore), new THREE.Mesh(this.geo.moteHalo, m.kind === 'dropped' ? this.mat.dropped : this.mat.moteHalo));
-        this.scene.add(v);
-        this.motes.set(m.id, v);
-      }
+    // Đom đóm và Bóng Mực vẽ bằng InstancedMesh (vài draw call cho hàng trăm thực thể, không cấp phát mỗi khung)
+    const M = this.tmpM, P = this.tmpP, S = this.tmpS, Q = this.tmpQ;
+    const nm = Math.min(g.motes.length, MAX_INST_MOTES);
+    for (let i = 0; i < nm; i++) {
+      const m = g.motes[i];
       const blink = m.kind === 'dropped' && m.ttl < 120 && Math.floor(t / 120) % 2 === 0;
-      v.visible = !blink;
-      v.position.set(m.pos[0], m.pos[1] + 0.6 + 0.15 * Math.sin(t / 300 + m.pos[0]), m.pos[2]);
+      P.set(m.pos[0], m.pos[1] + 0.6 + 0.15 * Math.sin(t / 300 + m.pos[0]), m.pos[2]);
+      S.setScalar(blink ? 0 : 1);
+      M.compose(P, Q, S);
+      this.moteCoreI.setMatrixAt(i, M);
+      this.moteHaloI.setMatrixAt(i, M);
     }
-    for (const [id, v] of this.motes) if (!seen.has(id)) { this.scene.remove(v); this.motes.delete(id); }
+    this.moteCoreI.count = this.moteHaloI.count = nm;
+    this.moteCoreI.instanceMatrix.needsUpdate = this.moteHaloI.instanceMatrix.needsUpdate = true;
 
-    seen.clear();
-    for (const s of g.shades) {
-      seen.add(s.id);
-      let v = this.shades.get(s.id);
-      if (!v) {
-        v = new THREE.Group();
-        v.add(new THREE.Mesh(this.geo.shade, this.mat.shade), new THREE.Mesh(this.geo.shadeRim, this.mat.shadeRim));
-        this.scene.add(v);
-        this.shades.set(s.id, v);
-      }
-      (v.children[0] as THREE.Mesh).material = s.state === 'stunned' ? this.mat.shadeStun : this.mat.shade;
-      v.children[1].visible = s.state !== 'stunned';
-      const k = s.state === 'spawning' ? Math.max(0.15, 1 - s.stateTicks / 60) : s.state === 'stunned' ? 0.75 : 1 + 0.06 * Math.sin(t / 150);
-      v.scale.setScalar(k);
-      v.position.set(s.pos[0], s.pos[1] + 0.12 * Math.sin(t / 200 + s.pos[2]), s.pos[2]);
+    const ns = Math.min(g.shades.length, MAX_INST_SHADES);
+    for (let i = 0; i < ns; i++) {
+      const s = g.shades[i];
+      const stunned = s.state === 'stunned';
+      const k = s.state === 'spawning' ? Math.max(0.15, 1 - s.stateTicks / 60) : stunned ? 0.75 : 1 + 0.06 * Math.sin(t / 150 + i);
+      P.set(s.pos[0], s.pos[1] + 0.12 * Math.sin(t / 200 + s.pos[2]), s.pos[2]);
+      S.setScalar(k);
+      M.compose(P, Q, S);
+      this.shadeBodyI.setMatrixAt(i, M);
+      this.shadeBodyI.setColorAt(i, stunned ? this.colStun : this.colBody);
+      if (stunned) { S.setScalar(0); M.compose(P, Q, S); }
+      this.shadeRimI.setMatrixAt(i, M);
     }
-    for (const [id, v] of this.shades) if (!seen.has(id)) { this.scene.remove(v); this.shades.delete(id); }
+    this.shadeBodyI.count = this.shadeRimI.count = ns;
+    this.shadeBodyI.instanceMatrix.needsUpdate = this.shadeRimI.instanceMatrix.needsUpdate = true;
+    if (this.shadeBodyI.instanceColor) this.shadeBodyI.instanceColor.needsUpdate = true;
 
+    const seen = this.seen;
     seen.clear();
     for (const d of g.drifters) {
       if (d.state === 'removed') continue;
@@ -317,6 +340,7 @@ export class World {
       this.leaves.position.set(p.pos[0], p.pos[1], p.pos[2]);
     }
 
+    if (freeCamera) return; // camera do người gọi điều khiển (bench)
     const th = (camYaw * Math.PI) / 180;
     this.camera.position.set(p.pos[0] - Math.sin(th) * 9, p.pos[1] + 5.5, p.pos[2] - Math.cos(th) * 9);
     this.camera.lookAt(p.pos[0], p.pos[1] + 1.2, p.pos[2]);

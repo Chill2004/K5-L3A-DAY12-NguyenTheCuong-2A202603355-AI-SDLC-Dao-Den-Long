@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Đảo Đèn Lồng</title>
   <style>
-    :root { --gold: #F2C14E; --danger: #FF5A5F; --text: #F5F1E6; --panel: rgba(14, 20, 48, .72); }
+    :root { --scale: 1; --fs: calc(18px * var(--scale)); --gold: #F2C14E; --danger: #FF5A5F; --text: #F5F1E6; --panel: rgba(14, 20, 48, .72); }
     html, body { margin: 0; height: 100%; overflow: hidden; background: #0E1430; font-family: system-ui, sans-serif; color: var(--text); }
     #app { position: fixed; inset: 0; }
-    .hud { position: fixed; pointer-events: none; padding: 8px 12px; background: var(--panel); border-radius: 10px; font-size: 16px; }
-    #hud-flames { top: 12px; left: 12px; font-size: 22px; letter-spacing: 4px; color: var(--gold); }
-    #hud-timer { top: 12px; left: 50%; transform: translateX(-50%); font-size: 24px; font-variant-numeric: tabular-nums; }
+    .hud { position: fixed; pointer-events: none; padding: 8px 12px; background: var(--panel); border-radius: 10px; font-size: var(--fs); }
+    #hud-flames { top: 12px; left: 12px; font-size: calc(24px * var(--scale)); letter-spacing: 4px; color: var(--gold); }
+    #hud-timer { top: 12px; left: 50%; transform: translateX(-50%); font-size: calc(28px * var(--scale)); font-variant-numeric: tabular-nums; }
     #hud-timer.danger { color: var(--danger); animation: blink 1s steps(2) infinite; }
     body.cb { --danger: #FFFFFF; }
     @keyframes blink { 50% { opacity: .35; } }
@@ -20,24 +20,35 @@
     #hud-motes i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #FFE58A55; }
     #hud-motes i.on { background: #FFF6C2; border-color: #FFE58A; box-shadow: 0 0 8px #FFE58A; }
     #hud-cd { bottom: 16px; right: 12px; display: flex; gap: 8px; }
-    .cd { width: 54px; height: 54px; border-radius: 10px; background: #0E1430; position: relative; overflow: hidden; text-align: center; font-size: 11px; line-height: 1.2; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; box-sizing: border-box; border: 2px solid var(--gold); }
+    .cd { width: calc(84px * var(--scale)); height: calc(70px * var(--scale)); border-radius: 10px; background: #0E1430; position: relative; overflow: hidden; text-align: center; font-size: var(--fs); line-height: 1.1; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; box-sizing: border-box; border: 2px solid var(--gold); }
     .cd .fill { position: absolute; left: 0; right: 0; bottom: 0; background: #F2C14E55; }
     .cd span { position: relative; }
-    #hud-charm { bottom: 84px; right: 12px; color: #ff8a9a; display: none; }
-    #hint { bottom: 60px; left: 50%; transform: translateX(-50%); display: none; }
+    #hud-charm { bottom: calc(100px * var(--scale)); right: 12px; color: #ff8a9a; display: none; }
+    #hint { bottom: calc(64px * var(--scale)); left: 50%; transform: translateX(-50%); display: none; }
     #arrow { position: fixed; width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 28px solid var(--gold); display: none; pointer-events: none; filter: drop-shadow(0 0 6px #FFB347); }
-    #fps { position: fixed; bottom: 4px; left: 6px; font: 12px monospace; color: #9fb0ff; display: none; }
+    #fps { position: fixed; bottom: 4px; left: 6px; font: 18px monospace; color: #9fb0ff; display: none; }
     #flash { position: fixed; inset: 0; background: var(--danger); opacity: 0; pointer-events: none; transition: opacity .25s; }
-    #screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 28, .78); text-align: center; }
-    #screen .box { max-width: 560px; padding: 28px 32px; background: rgba(27, 35, 80, .95); border-radius: 16px; border: 1px solid #F2C14E66; }
+    #screen { font-size: var(--fs); position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 28, .78); text-align: center; }
+    #screen .box { max-width: calc(620px * var(--scale)); max-height: 92vh; overflow-y: auto; padding: 28px 32px; background: rgba(27, 35, 80, .95); border-radius: 16px; border: 1px solid #F2C14E66; }
     #screen h1 { margin: 0 0 8px; color: var(--gold); }
     #screen h2 { margin: 0 0 12px; color: #FFB347; font-weight: 500; }
     #screen .quote { font-style: italic; opacity: .9; }
-    #screen button { display: block; width: 240px; margin: 10px auto 0; padding: 10px 0; font-size: 16px; border: 0; border-radius: 8px; background: var(--gold); color: #1B2350; cursor: pointer; }
+    #screen button { display: block; width: 240px; margin: 10px auto 0; padding: 10px 0; font-size: var(--fs); border: 0; border-radius: 8px; background: var(--gold); color: #1B2350; cursor: pointer; }
     #screen button.alt { background: transparent; color: var(--text); border: 1px solid #F5F1E655; }
     #screen label { display: block; margin: 12px 0; text-align: left; }
     #screen input[type=range] { width: 100%; }
-    .keys { font-size: 13px; opacity: .8; line-height: 1.6; margin-top: 12px; }
+    .keys { font-size: var(--fs); opacity: .8; line-height: 1.6; margin-top: 12px; }
+    #subs { position: fixed; top: calc(70px * var(--scale)); left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
+    #subs div { padding: 6px 14px; background: rgba(14, 20, 48, .85); border: 1px solid var(--gold); border-radius: 8px; font-size: var(--fs); }
+    #shade-arrow { position: fixed; width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 28px solid #b98cff; display: none; pointer-events: none; filter: drop-shadow(0 0 6px #7A3CFF); }
+    body.cb #shade-arrow { border-bottom-color: #00B3FF; }
+    table.lb { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    table.lb td, table.lb th { padding: 4px 8px; border-bottom: 1px solid #F5F1E622; text-align: left; }
+    #screen button.key { display: inline-block; width: auto; min-width: 120px; margin: 0; padding: 4px 12px; }
+    #screen button.key.dup { background: var(--danger); color: #1B2350; }
+    #screen input[type=text], #screen input:not([type]) { width: 100%; font-size: var(--fs); padding: 6px; box-sizing: border-box; }
+    .err { color: var(--danger); min-height: 1em; }
+    .small { opacity: .75; }
   </style>
 </head>
 <body>
@@ -55,6 +66,8 @@
     <div class="hud" id="hint"></div>
   </div>
   <div id="arrow"></div>
+  <div id="shade-arrow"></div>
+  <div id="subs" aria-live="polite"></div>
   <div id="fps"></div>
   <div id="flash"></div>
   <div id="screen"></div>
