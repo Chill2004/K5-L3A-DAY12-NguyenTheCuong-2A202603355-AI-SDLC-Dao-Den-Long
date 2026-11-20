@@ -1,6 +1,6 @@
 {
   "name": "dao-den-long",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Đảo Đèn Lồng - game 3D (Three.js) với chế độ headless theo Test Contract v1.0",
@@ -8,14 +8,17 @@
     "build": "tsc -p tsconfig.node.json && vite build",
     "build:node": "tsc -p tsconfig.node.json",
     "dev": "vite",
-    "preview": "vite preview --port 4173",
-    "start": "npm run build && npm run preview",
+    "preview": "node scripts/serve.mjs",
+    "start": "npm run build && node scripts/serve.mjs",
     "headless": "node build/headless/cli.js",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "verify": "npm run build:node && node scripts/verify.mjs",
     "fps": "node scripts/measure-fps.mjs",
-    "gen:scenarios": "node scripts/gen-scenarios.mjs"
+    "gen:scenarios": "node scripts/gen-scenarios.mjs",
+    "serve": "node scripts/serve.mjs",
+    "bench": "node scripts/bench.mjs --seed 42 --duration 30 --out docs/proof/phase-4/bench.json",
+    "soak": "node --expose-gc --jitless build/headless/soak.js --seed 7 --nights 10 --out docs/proof/phase-4/soak.json"
   },
   "dependencies": {
     "three": "0.170.0"
