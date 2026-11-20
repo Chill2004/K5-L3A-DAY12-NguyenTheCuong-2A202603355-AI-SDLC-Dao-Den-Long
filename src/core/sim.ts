@@ -32,6 +32,8 @@ export interface Game {
   nextShadeId: number;
   nextDrifterId: number;
   successfulLights: number;
+  /** Cảnh benchmark (Ticket-04): tắt sinh thêm, sát thương, nhặt, hao dầu, kết thúc Đêm; bóng chỉ wander. */
+  bench: boolean;
   prev: { jump: boolean; interact: boolean; pulse: boolean; dash: boolean; pause: boolean };
 }
 
@@ -114,7 +116,7 @@ export function createGame(tuning: Tuning, seed: number, night = 1, sc: Scenario
     randomDrifters: sc.random_drifters ?? true,
     windEnabled: sc.wind_enabled ?? true,
     wind: { ticks: 0, dirDeg: 0 },
-    nextMoteId: 1, nextShadeId: 1, nextDrifterId: 1, successfulLights: sp.successful_lights ?? 0,
+    nextMoteId: 1, nextShadeId: 1, nextDrifterId: 1, successfulLights: sp.successful_lights ?? 0, bench: false,
     prev: { jump: false, interact: false, pulse: false, dash: false, pause: false },
   };
   const p = g.player;
@@ -377,7 +379,7 @@ export function step(g: Game, input: Input): GameEvent[] {
   // Dầu: hao 1/s khi sáng + bị hút 5/s mỗi bóng đang drain; hết dầu thì tắt ngay sau bước 2
   const decay = fuelUnits(g.tuning.fuel_decay_per_s) / C.FUEL_UNIT; // đơn vị nguyên mỗi tick
   const drainPerTick = fuelUnits(g.tuning.drain_per_s) / C.FUEL_UNIT;
-  for (const l of g.lanterns) if (l.lit) l.fuel -= decay;
+  if (!g.bench) for (const l of g.lanterns) if (l.lit) l.fuel -= decay;
   for (const s of g.shades) {
     if (s.state !== 'drain') continue;
     const l = g.lanterns.find((x) => x.id === s.targetId);
@@ -408,7 +410,7 @@ export function step(g: Game, input: Input): GameEvent[] {
   const active = p.fallWait === 0;
 
   // 4. Nhặt đom đóm và bùa
-  if (active) {
+  if (active && !g.bench) {
     const cap = capacity(g);
     for (let i = 0; i < g.motes.length && p.carried < cap; ) {
       const m = g.motes[i];
@@ -545,7 +547,7 @@ export function step(g: Game, input: Input): GameEvent[] {
       else if (!l || !l.lit || hasSafeZone(g, l) || distXZ(s.pos, l.pos) > C.DRAIN_RANGE) { s.state = 'wander'; s.drainTicks = 0; }
       // drain: đứng yên
     } else if (s.state === 'wander' || s.state === 'chase') {
-      if (s.state === 'wander' && active && d <= C.SHADE_DETECT) s.state = 'chase';
+      if (s.state === 'wander' && active && !g.bench && d <= C.SHADE_DETECT) s.state = 'chase';
       else if (s.state === 'chase' && (!active || d > C.SHADE_LOSE)) s.state = 'wander';
       if (s.state === 'chase') {
         if (d > C.EPS) {
@@ -589,7 +591,7 @@ export function step(g: Game, input: Input): GameEvent[] {
   }
 
   // 9. Chạm: Gió Lạc cướp trước, rồi Bóng Mực
-  if (active) {
+  if (active && !g.bench) {
     for (const dr of g.drifters) {
       if (dr.state !== 'chase' || p.carried <= 0 || distXZ(dr.pos, p.pos) > C.DRIFTER_HIT) continue;
       const amount = Math.min(C.DRIFTER_STEAL, p.carried);
@@ -631,7 +633,7 @@ export function step(g: Game, input: Input): GameEvent[] {
     let n = 0;
     if (st === C.SHADE_FIRST_SPAWN_TICK) n = 2;
     else if (st > C.SHADE_FIRST_SPAWN_TICK && (st - C.SHADE_FIRST_SPAWN_TICK) % g.map.shadeIntervalTicks === 0) n = 1;
-    const valid = g.map.shadeSpawns.filter((pt) => distXZ(pt, p.pos) >= C.SHADE_SPAWN_MIN_DIST && inLitZone(g, pt) < 0);
+    const valid = n > 0 ? g.map.shadeSpawns.filter((pt) => distXZ(pt, p.pos) >= C.SHADE_SPAWN_MIN_DIST && inLitZone(g, pt) < 0) : [];
     for (let i = 0; i < n && g.shades.length < g.map.shadeMax && valid.length; i++) {
       const pt = valid.splice(pickIndex(g.rng, valid.length), 1)[0];
       const s = makeShade(g, `S${g.nextShadeId++}`, pt, 'spawning');
@@ -650,6 +652,7 @@ export function step(g: Game, input: Input): GameEvent[] {
   }
 
   // 11. Thắng / thua (Ticket-03): hết lửa luôn thua trước; bình minh thắng nếu số đèn sáng >= ceil(0.6 x tổng)
+  if (g.bench) return events;
   if (p.flames <= 0) endGame(g, 'lost', 'no_flames', ev);
   else if (timeLeft(g) <= C.EPS) {
     const need = Math.ceil(T.win_ratio * g.lanterns.length - C.EPS);
