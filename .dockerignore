@@ -1,0 +1,11 @@
+node_modules
+build
+dist
+.data
+.git
+.env
+.env.*
+tmp
+tmp_*.json
+*.log
+docs/proof/*/runs

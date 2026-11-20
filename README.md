@@ -22,6 +22,17 @@ npm ci && npm run build
 node scripts/serve.mjs        # mở http://localhost:4173
 ```
 
+**Hoặc dùng Docker** (không cần cài Node):
+
+```bash
+docker build -t dao-den-long .
+docker run --rm -p 4173:4173 dao-den-long                 # chơi: http://localhost:4173
+docker run --rm -v "$PWD/out:/out" dao-den-long node build/headless/cli.js --seed 1 --night 1 --ticks 600 --out /out/out.jsonl
+docker run --rm -v "$PWD/out:/out" dao-den-long node --expose-gc --jitless build/headless/soak.js --seed 7 --nights 10 --out /out/soak.json
+```
+
+Bench cần Chrome + GPU trên máy thật nên không chạy trong Docker. Bảng xếp hạng trong container lưu ở volume `/app/.data`.
+
 Bản phát hành: tải `dao-den-long-v1.0.0-web.zip` ở [Release v1.0.0](https://github.com/Chill2004/K5-L3A-DAY12-NguyenTheCuong-2A202603355-AI-SDLC-Dao-Den-Long/releases/tag/v1.0.0).
 Đó là thư mục web tĩnh: giải nén rồi phục vụ bằng bất kỳ web server tĩnh nào (vd. `npx serve dist`). Bảng xếp hạng khi đó lưu trong trình duyệt.
 

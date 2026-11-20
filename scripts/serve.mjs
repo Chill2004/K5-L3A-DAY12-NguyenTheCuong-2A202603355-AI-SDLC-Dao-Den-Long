@@ -63,7 +63,8 @@ export function startServer({ port = 4173, quiet = false } = {}) {
   return new Promise((ok, fail) => {
     const server = http.createServer(handler);
     server.on('error', fail);
-    server.listen(port, '127.0.0.1', () => {
+    // HOST=0.0.0.0 khi chạy trong Docker để truy cập được từ máy ngoài container
+    server.listen(port, process.env.HOST ?? '127.0.0.1', () => {
       const actual = server.address().port;
       if (!quiet) console.log(`Đảo Đèn Lồng: http://localhost:${actual}/  (Ctrl+C để dừng; bảng xếp hạng lưu ở ${LB_FILE})`);
       ok({ server, port: actual });

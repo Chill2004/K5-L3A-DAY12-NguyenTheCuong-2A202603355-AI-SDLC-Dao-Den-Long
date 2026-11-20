@@ -8,6 +8,7 @@
 - **Bảng xếp hạng** top 10 lưu đĩa (`.data/leaderboard.json`), màn hình từ menu, nhập tên sau Bình Minh/khi thua (hỗ trợ tiếng Việt có dấu), `node scripts/serve.mjs --export-leaderboard out.json`.
 - **Dễ tiếp cận:** đổi phím mọi hành động (báo trùng, khôi phục mặc định, lưu), phụ đề + mũi tên mép màn hình, giảm chuyển động, chữ ≥ 18 px và chữ lớn ×1.25.
 - Unit test: leaderboard, thống kê bench, cảnh bench (`tests/phase4.test.ts`).
+- **Dockerfile** (game + headless + soak trên Linux; `HOST=0.0.0.0`) và job CI `docker`.
 
 ### Thay đổi
 - `run_cmd` đổi từ `npm run preview` sang `node scripts/serve.mjs` (phục vụ `dist/` + API bảng xếp hạng).

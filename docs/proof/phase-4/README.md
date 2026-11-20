@@ -41,6 +41,14 @@ Tái lập ở tag `phase-4`: `npm ci && npm run build && npm test && npm run ve
 Clone sang thư mục mới → `npm ci && npm run build` → `node scripts/serve.mjs` mở được game; `node build/headless/cli.js ...` chạy được
 (thực hiện ở Phase 1 và lặp lại trước khi phát hành; CI kiểm trên Ubuntu + macOS).
 
+## Docker (Linux)
+`docker build -t dao-den-long .` (image `node:22-slim`), chạy trên Docker Desktop (kernel Linux 6.18 WSL2):
+- headless `--seed 1 --night 1 --ticks 600`: exit 0, `{"type":"end","ticks":600,"state":"playing","score":0}`.
+- soak: 0 crash, RSS 46.7 → 50.3 MB (1.08×).
+- `docker run -p 4180:4173`: trang trả `<title>Đảo Đèn Lồng</title>`, `/api/leaderboard` trả `{"entries":[]}`.
+- **Tất định giữa hệ điều hành:** output headless của `13_night1_random_schedule`, `17_charm`, `27_drain` chạy trong container Linux **giống hệt từng byte** với bản chạy trên Windows (`cmp`).
+- CI có thêm job `docker` (build image, chạy headless + soak, kiểm game phục vụ qua cổng 4173) mỗi lần push.
+
 ## Ghi chú trung thực
 - Số FPS chỉ để tham khảo, đo trên máy cá nhân (Windows 11, i7-10750H, Intel UHD, Chrome 158, đang cắm sạc). Máy chấm sẽ đo lại.
 - Các mục dễ tiếp cận (mục 4) mới kiểm thủ công, chưa có test tự động.

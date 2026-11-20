@@ -21,3 +21,22 @@ jobs:
         with:
           name: proof-${{ matrix.os }}
           path: docs/proof/ci/
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t dao-den-long .
+      - name: Headless và soak trong container
+        run: |
+          mkdir -p out
+          docker run --rm -v "$PWD/out:/out" dao-den-long node build/headless/cli.js --seed 1 --night 1 --ticks 600 --out /out/out.jsonl
+          tail -1 out/out.jsonl
+          docker run --rm -v "$PWD/out:/out" dao-den-long node --expose-gc --jitless build/headless/soak.js --seed 7 --nights 10 --out /out/soak.json
+      - name: Game phục vụ được qua cổng 4173
+        run: |
+          docker run -d --name ddl -p 4173:4173 dao-den-long
+          for i in $(seq 1 20); do curl -sf http://localhost:4173/ > /dev/null && break; sleep 1; done
+          curl -sf http://localhost:4173/ | grep -q "Đảo Đèn Lồng"
+          curl -sf http://localhost:4173/api/leaderboard
+          docker rm -f ddl
