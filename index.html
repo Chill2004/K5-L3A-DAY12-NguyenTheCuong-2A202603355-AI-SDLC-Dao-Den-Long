@@ -5,31 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Đảo Đèn Lồng</title>
   <style>
-    html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0814; font-family: system-ui, sans-serif; color: #ffe9c4; }
+    :root { --gold: #F2C14E; --danger: #FF5A5F; --text: #F5F1E6; --panel: rgba(14, 20, 48, .72); }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0E1430; font-family: system-ui, sans-serif; color: var(--text); }
     #app { position: fixed; inset: 0; }
-    #hud { position: fixed; top: 12px; left: 12px; padding: 10px 14px; background: rgba(20, 10, 30, .6); border-radius: 10px; line-height: 1.6; font-size: 15px; pointer-events: none; }
-    #hud b { color: #ffb547; }
-    #hint { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 6px 14px; background: rgba(20, 10, 30, .7); border-radius: 8px; display: none; pointer-events: none; }
-    #help { position: fixed; top: 12px; right: 12px; padding: 10px 14px; background: rgba(20, 10, 30, .5); border-radius: 10px; font-size: 13px; line-height: 1.5; pointer-events: none; }
-    #flash { position: fixed; inset: 0; background: #7a1030; opacity: 0; pointer-events: none; transition: opacity .25s; }
-    #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8, 4, 16, .72); text-align: center; }
-    #overlay .box { max-width: 520px; padding: 28px 32px; background: rgba(40, 20, 50, .9); border-radius: 16px; border: 1px solid #ffb54755; }
-    #overlay h1 { margin: 0 0 8px; color: #ffb547; }
-    #overlay button { margin-top: 14px; padding: 10px 22px; font-size: 16px; border: 0; border-radius: 8px; background: #ffb547; color: #2a1530; cursor: pointer; }
+    .hud { position: fixed; pointer-events: none; padding: 8px 12px; background: var(--panel); border-radius: 10px; font-size: 16px; }
+    #hud-flames { top: 12px; left: 12px; font-size: 22px; letter-spacing: 4px; color: var(--gold); }
+    #hud-timer { top: 12px; left: 50%; transform: translateX(-50%); font-size: 24px; font-variant-numeric: tabular-nums; }
+    #hud-timer.danger { color: var(--danger); animation: blink 1s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: .35; } }
+    #hud-right { top: 12px; right: 12px; text-align: right; }
+    #hud-right b { color: var(--gold); }
+    #hud-motes { bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; }
+    #hud-motes i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #FFE58A55; }
+    #hud-motes i.on { background: #FFF6C2; border-color: #FFE58A; box-shadow: 0 0 8px #FFE58A; }
+    #hud-cd { bottom: 16px; right: 12px; display: flex; gap: 8px; }
+    .cd { width: 54px; height: 54px; border-radius: 10px; background: #0E1430; position: relative; overflow: hidden; text-align: center; font-size: 11px; line-height: 1.2; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; box-sizing: border-box; border: 2px solid var(--gold); }
+    .cd .fill { position: absolute; left: 0; right: 0; bottom: 0; background: #F2C14E55; }
+    .cd span { position: relative; }
+    #hud-charm { bottom: 84px; right: 12px; color: #ff8a9a; display: none; }
+    #hint { bottom: 60px; left: 50%; transform: translateX(-50%); display: none; }
+    #arrow { position: fixed; width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 28px solid var(--gold); display: none; pointer-events: none; filter: drop-shadow(0 0 6px #FFB347); }
+    #fps { position: fixed; bottom: 4px; left: 6px; font: 12px monospace; color: #9fb0ff; display: none; }
+    #flash { position: fixed; inset: 0; background: var(--danger); opacity: 0; pointer-events: none; transition: opacity .25s; }
+    #screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8, 10, 28, .78); text-align: center; }
+    #screen .box { max-width: 560px; padding: 28px 32px; background: rgba(27, 35, 80, .95); border-radius: 16px; border: 1px solid #F2C14E66; }
+    #screen h1 { margin: 0 0 8px; color: var(--gold); }
+    #screen h2 { margin: 0 0 12px; color: #FFB347; font-weight: 500; }
+    #screen .quote { font-style: italic; opacity: .9; }
+    #screen button { display: block; width: 240px; margin: 10px auto 0; padding: 10px 0; font-size: 16px; border: 0; border-radius: 8px; background: var(--gold); color: #1B2350; cursor: pointer; }
+    #screen button.alt { background: transparent; color: var(--text); border: 1px solid #F5F1E655; }
+    #screen label { display: block; margin: 12px 0; text-align: left; }
+    #screen input[type=range] { width: 100%; }
+    .keys { font-size: 13px; opacity: .8; line-height: 1.6; margin-top: 12px; }
   </style>
 </head>
 <body>
   <div id="app"></div>
-  <div id="hud"></div>
-  <div id="hint"></div>
-  <div id="help">WASD: đi · Space: nhảy · E: nạp đèn<br />F: xung sáng · Kéo chuột / ← →: xoay camera<br />R: chơi lại</div>
+  <div id="hud" style="display:none">
+    <div class="hud" id="hud-flames"></div>
+    <div class="hud" id="hud-timer"></div>
+    <div class="hud" id="hud-right"></div>
+    <div class="hud" id="hud-motes"></div>
+    <div class="hud" id="hud-cd">
+      <div class="cd" id="cd-dash"><div class="fill"></div><span>Lướt<br>Shift</span></div>
+      <div class="cd" id="cd-pulse"><div class="fill"></div><span>Tỏa Sáng<br>F</span></div>
+    </div>
+    <div class="hud" id="hud-charm"></div>
+    <div class="hud" id="hint"></div>
+  </div>
+  <div id="arrow"></div>
+  <div id="fps"></div>
   <div id="flash"></div>
-  <div id="overlay"><div class="box">
-    <h1>Đảo Đèn Lồng</h1>
-    <p>Đêm 1 – Đảo Bến. Sương đen đã nuốt ánh sáng. Giúp Mây gom đom đóm và thắp lại 5 Đèn Lồng Lớn trước bình minh.</p>
-    <p>Né Bóng Mực, hoặc phát xung sáng (tốn 1 đom đóm) để xua chúng. Bóng Mực không dám lại gần đèn đã sáng.</p>
-    <button id="start">Bắt đầu (Enter)</button>
-  </div></div>
+  <div id="screen"></div>
   <script type="module" src="./src/render/main.ts"></script>
 </body>
 </html>
