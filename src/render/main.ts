@@ -2,7 +2,7 @@
 // Core chạy 60 tick/giây cố định; tạm dừng thì không gọi step (logic dừng hoàn toàn).
 import * as THREE from 'three';
 import contract from '../../game.contract.json';
-import { createGame, step, timeLeft, distXZ, type Game } from '../core/sim.js';
+import { createGame, step, timeLeft, distXZ, capacity, type Game } from '../core/sim.js';
 import { TICK_RATE } from '../core/constants.js';
 import { MAPS } from '../core/maps.js';
 import type { GameEvent, Input, Scenario, Tuning } from '../core/types.js';
@@ -18,6 +18,8 @@ const world = new World($('app'));
 const audio = new Audio();
 const settings = loadSettings();
 audio.setVolume(settings.volume);
+const applyColorblind = () => { world.setColorblind(settings.colorblind); document.body.classList.toggle('cb', settings.colorblind); };
+applyColorblind();
 
 const ONG_DANG: Record<number, string> = {
   1: '“Mây à, sương đen tràn về Đảo Bến rồi. Gom đom đóm, thắp lại năm ngọn đèn trước khi trời sáng nhé.” – Ông Đăng',
@@ -104,11 +106,14 @@ function showSettings(back: Mode) {
   mode = 'settings';
   screen(`<h1>Cài đặt</h1>
     <label>Âm lượng: <span id="vv">${Math.round(settings.volume * 100)}%</span><input id="vol" type="range" min="0" max="1" step="0.05" value="${settings.volume}"></label>
-    <label>Độ nhạy chuột: <span id="sv">${settings.sensitivity.toFixed(1)}</span><input id="sens" type="range" min="0.2" max="3" step="0.1" value="${settings.sensitivity}"></label>`,
+    <label>Độ nhạy chuột: <span id="sv">${settings.sensitivity.toFixed(1)}</span><input id="sens" type="range" min="0.2" max="3" step="0.1" value="${settings.sensitivity}"></label>
+    <label><input id="cb" type="checkbox" ${settings.colorblind ? 'checked' : ''}> Bảng màu dễ phân biệt (mù màu)</label>`,
   [['Xong', () => (back === 'paused' ? showPause() : showMenu())]]);
   const vol = $('vol') as HTMLInputElement, sens = $('sens') as HTMLInputElement;
   vol.oninput = () => { settings.volume = +vol.value; audio.setVolume(settings.volume); $('vv').textContent = `${Math.round(settings.volume * 100)}%`; saveSettings(settings); };
   sens.oninput = () => { settings.sensitivity = +sens.value; $('sv').textContent = settings.sensitivity.toFixed(1); saveSettings(settings); };
+  const cb = $('cb') as HTMLInputElement;
+  cb.onchange = () => { settings.colorblind = cb.checked; applyColorblind(); saveSettings(settings); };
 }
 
 function showPause() {
@@ -129,7 +134,7 @@ function togglePause() {
 function showResult(result: string, reason: string) {
   mode = 'result';
   audio.stopMusic();
-  const why: Record<string, string> = { all_lit: 'Tất cả Đèn Lồng đã sáng lại!', dawn: 'Bình minh tới mà đảo chưa sáng đủ.', no_flames: 'Mây đã hết Ngọn Lửa.' };
+  const why: Record<string, string> = { dawn_survived: 'Bình minh tới và đảo vẫn đủ sáng!', dawn: 'Bình minh tới mà đảo chưa sáng đủ.', no_flames: 'Mây đã hết Ngọn Lửa.' };
   if (result === 'won') {
     nightScores[night] = game.score;
     const total = Object.values(nightScores).reduce((a, b) => a + b, 0);
@@ -185,7 +190,10 @@ function onEvents(evs: GameEvent[]) {
 
 // ---------- HUD ----------
 const moteCells: HTMLElement[] = [];
-for (let i = 0; i < tuning.carry_capacity; i++) { const c = document.createElement('i'); $('hud-motes').appendChild(c); moteCells.push(c); }
+for (let i = 0; i < tuning.capacity_max; i++) { const c = document.createElement('i'); $('hud-motes').appendChild(c); moteCells.push(c); }
+const moteText = document.createElement('span');
+moteText.style.marginLeft = '8px';
+$('hud-motes').appendChild(moteText);
 const v3 = new THREE.Vector3();
 
 function hud() {
@@ -195,9 +203,12 @@ function hud() {
   const timer = $('hud-timer');
   timer.textContent = `${String(Math.floor(tl / 60)).padStart(2, '0')}:${String(Math.floor(tl % 60)).padStart(2, '0')}`;
   timer.classList.toggle('danger', tl <= 30);
+  if (tl <= 30 && settings.colorblind) timer.textContent = '⚠ ' + timer.textContent;
   const lit = g.lanterns.filter((l) => l.lit).length;
   $('hud-right').innerHTML = `Đèn <b>${lit}/${g.lanterns.length}</b><br>Điểm <b>${g.score}</b>`;
-  moteCells.forEach((c, i) => c.classList.toggle('on', i < p.carried));
+  const cap = capacity(g);
+  moteCells.forEach((c, i) => { c.classList.toggle('on', i < p.carried); c.style.display = i < cap ? 'block' : 'none'; });
+  moteText.textContent = `${p.carried}/${cap}`;
   const dashFrac = p.charmTicks > 0 ? 0 : p.dashCdTicks / (tuning.dash_cooldown_s * TICK_RATE);
   const pulseFrac = p.pulseCdTicks / (tuning.pulse_cooldown_s * TICK_RATE);
   ($('cd-dash').firstElementChild as HTMLElement).style.height = `${(1 - dashFrac) * 100}%`;
@@ -207,9 +218,10 @@ function hud() {
   charm.style.display = p.charmTicks > 0 ? 'block' : 'none';
   charm.textContent = `Bùa Gió ${(p.charmTicks / TICK_RATE).toFixed(1)}s`;
 
-  const near = g.lanterns.find((l) => !l.lit && distXZ(l.pos, p.pos) <= tuning.interact_radius);
+  const full = (l: (typeof g.lanterns)[number]) => l.lit && l.fuel >= tuning.fuel_max * 60;
+  const near = g.lanterns.find((l) => !full(l) && distXZ(l.pos, p.pos) <= tuning.interact_radius);
   const hint = $('hint');
-  if (near && g.state === 'playing') { hint.style.display = 'block'; hint.textContent = `E — Nạp ánh sáng (${near.deposited}/${tuning.lantern_cost})`; }
+  if (near && g.state === 'playing') { hint.style.display = 'block'; hint.textContent = near.lit ? `E — Châm dầu (${(near.fuel / 60).toFixed(0)}/100)` : `E — Nạp ánh sáng (${near.deposited}/${near.everLit ? tuning.relight_cost : tuning.lantern_cost})`; }
   else hint.style.display = 'none';
 
   // Mũi tên tới đèn chưa sáng gần nhất khi nó ở ngoài màn hình

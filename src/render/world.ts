@@ -20,7 +20,7 @@ export class World {
   camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 400);
   private ambient = new THREE.HemisphereLight('#8a90c8', '#1a1830', 0.15);
   private mapGroup = new THREE.Group();
-  private lanterns: { glass: THREE.Mesh; light: THREE.PointLight; halo: THREE.Mesh }[] = [];
+  private lanterns: { glass: THREE.Mesh; light: THREE.PointLight; halo: THREE.Mesh; bar: THREE.Mesh; barBg: THREE.Mesh; rip: THREE.Mesh }[] = [];
   private charms: THREE.Group[] = [];
   private motes = new Map<string, THREE.Group>();
   private shades = new Map<string, THREE.Group>();
@@ -169,10 +169,19 @@ export class World {
       const halo = new THREE.Mesh(new THREE.RingGeometry(g.tuning.safe_radius - 0.12, g.tuning.safe_radius, 64), new THREE.MeshBasicMaterial({ color: PAL.lampOn, transparent: true, opacity: 0, side: THREE.DoubleSide }));
       halo.rotation.x = -Math.PI / 2;
       halo.position.y = 0.05;
-      grp.add(pole, glass, light, halo);
+      // Thanh dầu (billboard đơn giản: luôn quay theo camera trong sync)
+      const barBg = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.16), new THREE.MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.6 }));
+      barBg.position.y = 4.3;
+      const bar = new THREE.Mesh(new THREE.PlaneGeometry(1.36, 0.12), new THREE.MeshBasicMaterial({ color: PAL.lampOn }));
+      bar.position.set(0, 4.3, 0.01);
+      // Vết rách trên giấy đèn tắt (phân biệt không cần màu)
+      const rip = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.7), new THREE.MeshBasicMaterial({ color: '#111111' }));
+      rip.position.set(0.2, 3.35, 0.35);
+      rip.rotation.set(0.3, 0.4, 0.9);
+      grp.add(pole, glass, light, halo, barBg, bar, rip);
       grp.position.set(l.pos[0], l.pos[1], l.pos[2]);
       add(grp);
-      this.lanterns.push({ glass, light, halo });
+      this.lanterns.push({ glass, light, halo, bar, barBg, rip });
     }
     for (const c of g.charms) {
       const grp = new THREE.Group();
@@ -183,6 +192,11 @@ export class World {
       add(grp);
       this.charms.push(grp);
     }
+  }
+
+  /** Bảng màu dễ phân biệt: viền/mắt Bóng Mực #7A3CFF -> #00B3FF. */
+  setColorblind(on: boolean) {
+    this.mat.shadeRim.color.set(on ? '#00B3FF' : PAL.shadeRim);
   }
 
   onPulse(g: Game) {
@@ -197,15 +211,28 @@ export class World {
     this.may.visible = p.fallWait === 0 && (p.invulnTicks === 0 || Math.floor(t / 80) % 2 === 0);
 
     const lit = g.lanterns.filter((l) => l.lit).length;
+    const low = g.tuning.low_fuel_threshold * 60;
+    const blinkOff = Math.floor(t / 500) % 2 === 1; // nhấp nháy chậm 1 Hz
     g.lanterns.forEach((l, i) => {
       const v = this.lanterns[i];
       if (!v) return;
+      const weak = l.lit && l.fuel < low;
+      const on = l.lit && !(weak && blinkOff);
       const m = v.glass.material as THREE.MeshStandardMaterial;
       m.color.set(l.lit ? PAL.lampOn : PAL.lampOff);
-      m.emissive.set(l.lit ? PAL.lampCore : '#000000');
-      m.emissiveIntensity = l.lit ? 1 : 0;
-      v.light.intensity = l.lit ? 40 : 0;
-      (v.halo.material as THREE.MeshBasicMaterial).opacity = l.lit ? 0.4 : 0;
+      m.emissive.set(on ? PAL.lampCore : '#000000');
+      m.emissiveIntensity = on ? 1 : 0;
+      v.glass.scale.set(1, l.lit ? 1 : 0.8, 1); // đèn tắt xẹp 20%
+      v.rip.visible = !l.lit;
+      v.light.intensity = on ? 40 : 0;
+      (v.halo.material as THREE.MeshBasicMaterial).opacity = l.lit && !weak ? 0.4 : 0; // dầu < 30 mất vùng an toàn
+      v.bar.visible = v.barBg.visible = l.lit && !(weak && blinkOff);
+      const frac = Math.max(0.001, l.fuel / (g.tuning.fuel_max * 60));
+      v.bar.scale.x = frac;
+      v.bar.position.x = -0.68 * (1 - frac);
+      (v.bar.material as THREE.MeshBasicMaterial).color.set(weak ? '#ff7a3c' : PAL.lampOn);
+      const grp = v.bar.parent!;
+      grp.rotation.set(0, Math.atan2(this.camera.position.x - grp.position.x, this.camera.position.z - grp.position.z), 0);
     });
     this.ambient.intensity = 0.15 + 0.55 * (lit / g.lanterns.length); // công thức chuẩn
 

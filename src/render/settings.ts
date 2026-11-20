@@ -1,7 +1,7 @@
 // Cài đặt (âm lượng, độ nhạy chuột), lưu giữa các lần mở game bằng localStorage.
-export interface Settings { volume: number; sensitivity: number }
+export interface Settings { volume: number; sensitivity: number; colorblind: boolean }
 const KEY = 'dao-den-long.settings';
-const DEFAULTS: Settings = { volume: 0.6, sensitivity: 1 };
+const DEFAULTS: Settings = { volume: 0.6, sensitivity: 1, colorblind: false };
 
 export function loadSettings(): Settings {
   try {
@@ -11,6 +11,7 @@ export function loadSettings(): Settings {
       return {
         volume: typeof s.volume === 'number' ? Math.min(1, Math.max(0, s.volume)) : DEFAULTS.volume,
         sensitivity: typeof s.sensitivity === 'number' ? Math.min(3, Math.max(0.2, s.sensitivity)) : DEFAULTS.sensitivity,
+        colorblind: s.colorblind === true,
       };
     }
   } catch { /* trình duyệt chặn storage: dùng mặc định */ }
