@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đảo Đèn Lồng</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0814; font-family: system-ui, sans-serif; color: #ffe9c4; }
+    #app { position: fixed; inset: 0; }
+    #hud { position: fixed; top: 12px; left: 12px; padding: 10px 14px; background: rgba(20, 10, 30, .6); border-radius: 10px; line-height: 1.6; font-size: 15px; pointer-events: none; }
+    #hud b { color: #ffb547; }
+    #hint { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 6px 14px; background: rgba(20, 10, 30, .7); border-radius: 8px; display: none; pointer-events: none; }
+    #help { position: fixed; top: 12px; right: 12px; padding: 10px 14px; background: rgba(20, 10, 30, .5); border-radius: 10px; font-size: 13px; line-height: 1.5; pointer-events: none; }
+    #flash { position: fixed; inset: 0; background: #7a1030; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(8, 4, 16, .72); text-align: center; }
+    #overlay .box { max-width: 520px; padding: 28px 32px; background: rgba(40, 20, 50, .9); border-radius: 16px; border: 1px solid #ffb54755; }
+    #overlay h1 { margin: 0 0 8px; color: #ffb547; }
+    #overlay button { margin-top: 14px; padding: 10px 22px; font-size: 16px; border: 0; border-radius: 8px; background: #ffb547; color: #2a1530; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="hud"></div>
+  <div id="hint"></div>
+  <div id="help">WASD: đi · Space: nhảy · E: nạp đèn<br />F: xung sáng · Kéo chuột / ← →: xoay camera<br />R: chơi lại</div>
+  <div id="flash"></div>
+  <div id="overlay"><div class="box">
+    <h1>Đảo Đèn Lồng</h1>
+    <p>Đêm 1 – Đảo Bến. Sương đen đã nuốt ánh sáng. Giúp Mây gom đom đóm và thắp lại 5 Đèn Lồng Lớn trước bình minh.</p>
+    <p>Né Bóng Mực, hoặc phát xung sáng (tốn 1 đom đóm) để xua chúng. Bóng Mực không dám lại gần đèn đã sáng.</p>
+    <button id="start">Bắt đầu (Enter)</button>
+  </div></div>
+  <script type="module" src="./src/render/main.ts"></script>
+</body>
+</html>
