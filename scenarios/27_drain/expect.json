@@ -1,0 +1,49 @@
+{
+  "requirement": "T3 bóng wander tới đèn fuel < 30 (mất vùng an toàn), cách <= 2 m thì drain, hút 5/s + hao 1/s, fuel_drain mỗi 60 tick",
+  "seed": 1,
+  "ticks": 130,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 101,
+        "name": "fuel_drain",
+        "data": {
+          "lantern_id": "L1",
+          "shade_id": "S1",
+          "fuel": 22.3
+        }
+      }
+    ],
+    "event_count": {
+      "fuel_drain": 1
+    },
+    "snapshots": [
+      {
+        "tick": 40,
+        "match": {
+          "shades": [
+            {
+              "state": "wander"
+            }
+          ]
+        }
+      },
+      {
+        "tick": 50,
+        "match": {
+          "shades": [
+            {
+              "state": "drain",
+              "pos": [
+                0,
+                1,
+                12
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

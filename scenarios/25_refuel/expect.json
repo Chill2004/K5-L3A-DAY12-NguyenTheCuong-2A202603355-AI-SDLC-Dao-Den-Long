@@ -1,0 +1,47 @@
+{
+  "requirement": "T3 châm dầu: used = min(mang, ceil((100-fuel)/10)), fuel = min(100, fuel + 10 x used), +5/đom đóm",
+  "seed": 1,
+  "ticks": 30,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "refuel",
+        "data": {
+          "lantern_id": "L1",
+          "amount": 5,
+          "fuel": 100
+        }
+      },
+      {
+        "tick": 11,
+        "name": "refuel",
+        "data": {
+          "lantern_id": "L1",
+          "amount": 1,
+          "fuel": 100
+        }
+      }
+    ],
+    "event_count": {
+      "refuel": 2,
+      "lantern_lit": 0,
+      "deposit": 0
+    },
+    "snapshots": [
+      {
+        "tick": 20,
+        "match": {
+          "player": {
+            "carried": 4
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 30,
+      "score": 30
+    }
+  }
+}

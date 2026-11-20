@@ -1,0 +1,53 @@
+{
+  "requirement": "T3 thắp lại đèn ever_lit chỉ cần 5; lantern_lit relight: true; +40; relit_count; sức chứa tăng",
+  "seed": 1,
+  "ticks": 20,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "deposit",
+        "data": {
+          "lantern_id": "L1",
+          "amount": 5,
+          "deposited": 5
+        }
+      },
+      {
+        "tick": 1,
+        "name": "lantern_lit",
+        "data": {
+          "lantern_id": "L1",
+          "relight": true
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "player": {
+            "carried": 0,
+            "capacity": 12
+          },
+          "lanterns": [
+            {
+              "lit": true,
+              "relit_count": 1,
+              "ever_lit": true
+            },
+            {},
+            {},
+            {},
+            {}
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 20,
+      "score": 65
+    }
+  }
+}

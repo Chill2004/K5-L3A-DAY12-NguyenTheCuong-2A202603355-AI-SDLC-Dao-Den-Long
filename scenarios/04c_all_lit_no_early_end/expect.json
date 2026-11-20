@@ -1,0 +1,36 @@
+{
+  "requirement": "T3 thắp đủ 5/5 đèn không kết thúc Đêm; sức chứa 10 + 2 x 1 = 12 (đèn đặt sẵn không tính)",
+  "seed": 1,
+  "ticks": 120,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "lantern_lit",
+        "data": {
+          "lantern_id": "L1",
+          "relight": false
+        }
+      }
+    ],
+    "no_events": [
+      "game_over"
+    ],
+    "snapshots": [
+      {
+        "tick": 10,
+        "match": {
+          "player": {
+            "capacity": 12
+          }
+        }
+      }
+    ],
+    "end": {
+      "ticks": 120,
+      "state": "playing",
+      "score": 150
+    }
+  }
+}

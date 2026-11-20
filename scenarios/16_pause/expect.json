@@ -22,7 +22,7 @@
         "match": {
           "state": "paused",
           "sim_tick": 10,
-          "time_left_s": 299.833,
+          "time_left_s": 239.833,
           "player": {
             "pos": [
               0,

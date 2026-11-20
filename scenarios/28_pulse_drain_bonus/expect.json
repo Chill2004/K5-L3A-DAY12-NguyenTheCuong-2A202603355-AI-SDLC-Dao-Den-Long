@@ -1,0 +1,42 @@
+{
+  "requirement": "T3 Tỏa Sáng trúng bóng đang drain: stunned, tổng +15",
+  "seed": 1,
+  "ticks": 20,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "pulse",
+        "data": {
+          "stunned_ids": [
+            "S1"
+          ]
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 0,
+        "match": {
+          "shades": [
+            {
+              "state": "drain"
+            }
+          ]
+        }
+      },
+      {
+        "tick": 10,
+        "match": {
+          "score": 15,
+          "shades": [
+            {
+              "state": "stunned"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

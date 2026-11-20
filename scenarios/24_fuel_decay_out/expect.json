@@ -1,0 +1,51 @@
+{
+  "requirement": "T3 dầu hao 1/s; fuel <= 0 thì tắt, deposited = 0, lantern_out, ever_lit = true",
+  "seed": 1,
+  "ticks": 100,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 60,
+        "name": "lantern_out",
+        "data": {
+          "lantern_id": "L1"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 30,
+        "match": {
+          "lanterns": [
+            {
+              "lit": true,
+              "fuel": 0.5
+            },
+            {},
+            {},
+            {},
+            {}
+          ]
+        }
+      },
+      {
+        "tick": 60,
+        "match": {
+          "lanterns": [
+            {
+              "lit": false,
+              "fuel": 0,
+              "deposited": 0,
+              "ever_lit": true
+            },
+            {},
+            {},
+            {},
+            {}
+          ]
+        }
+      }
+    ]
+  }
+}

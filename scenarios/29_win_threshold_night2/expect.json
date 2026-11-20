@@ -1,0 +1,23 @@
+{
+  "requirement": "T3 Đêm 2 thắng với 4/6 đèn sáng; điểm 4 x 149 + 150 = 746",
+  "seed": 1,
+  "night": 2,
+  "ticks": 120,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 60,
+        "name": "game_over",
+        "data": {
+          "result": "won",
+          "reason": "dawn_survived"
+        }
+      }
+    ],
+    "end": {
+      "state": "won",
+      "score": 746
+    }
+  }
+}

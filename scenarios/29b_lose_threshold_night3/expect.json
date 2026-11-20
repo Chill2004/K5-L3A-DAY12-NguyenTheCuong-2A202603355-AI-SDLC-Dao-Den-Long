@@ -1,0 +1,22 @@
+{
+  "requirement": "T3 Đêm 3 chỉ 4/7 đèn sáng (< 5) thì thua dawn",
+  "seed": 1,
+  "night": 3,
+  "ticks": 120,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 60,
+        "name": "game_over",
+        "data": {
+          "result": "lost",
+          "reason": "dawn"
+        }
+      }
+    ],
+    "end": {
+      "state": "lost"
+    }
+  }
+}

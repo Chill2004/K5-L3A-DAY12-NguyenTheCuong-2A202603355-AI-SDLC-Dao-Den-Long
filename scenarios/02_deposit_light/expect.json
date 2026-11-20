@@ -1,5 +1,5 @@
 {
-  "requirement": "R3 nạp ở biên interact_radius 2.0; đủ 10 thì thắp; điểm 10/đom đóm nạp + 100/đèn = 200",
+  "requirement": "R3 nạp ở biên interact_radius 2.0; đủ 10 thì thắp lần đầu; điểm (Ticket-03) 10 x 5 + 100 = 150",
   "seed": 1,
   "ticks": 20,
   "snapshot_every": 10,
@@ -18,7 +18,8 @@
         "tick": 1,
         "name": "lantern_lit",
         "data": {
-          "lantern_id": "L1"
+          "lantern_id": "L1",
+          "relight": false
         }
       }
     ],
@@ -29,18 +30,22 @@
       {
         "tick": 10,
         "match": {
-          "score": 200,
+          "score": 150,
           "player": {
-            "carried": 0
+            "carried": 0,
+            "capacity": 12
           },
           "lanterns": [
             {
               "id": "L1",
               "lit": true,
-              "deposited": 10
+              "deposited": 10,
+              "ever_lit": true,
+              "relit_count": 0
             },
             {
-              "lit": false
+              "lit": false,
+              "fuel": 0
             },
             {
               "lit": false
@@ -58,7 +63,7 @@
     "end": {
       "ticks": 20,
       "state": "playing",
-      "score": 200
+      "score": 150
     }
   }
 }

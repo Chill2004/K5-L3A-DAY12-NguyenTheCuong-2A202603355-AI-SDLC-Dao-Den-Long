@@ -1,0 +1,38 @@
+{
+  "requirement": "T3 châm dầu lên >= 30 khi có bóng trong vùng: đẩy ra mép trong 30 tick, không gây sát thương",
+  "seed": 1,
+  "ticks": 60,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 1,
+        "name": "refuel",
+        "data": {
+          "lantern_id": "L1",
+          "amount": 9,
+          "fuel": 100
+        }
+      }
+    ],
+    "no_events": [
+      "player_hit"
+    ],
+    "snapshots": [
+      {
+        "tick": 30,
+        "match": {
+          "shades": [
+            {
+              "pos": [
+                0,
+                1,
+                -4.5
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

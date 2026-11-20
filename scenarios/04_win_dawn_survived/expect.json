@@ -1,0 +1,47 @@
+{
+  "requirement": "T3 thắng khi sống tới bình minh và >= 3/5 đèn sáng; điểm 3 x (50 + floor(99)) + 3 x 50 = 597",
+  "seed": 1,
+  "ticks": 600,
+  "snapshot_every": 10,
+  "expect": {
+    "events": [
+      {
+        "tick": 60,
+        "name": "game_over",
+        "data": {
+          "result": "won",
+          "reason": "dawn_survived"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "tick": 0,
+        "match": {
+          "score": 0,
+          "player": {
+            "capacity": 10
+          },
+          "lanterns": [
+            {
+              "lit": true,
+              "fuel": 100,
+              "ever_lit": true
+            },
+            {},
+            {},
+            {
+              "lit": false
+            },
+            {}
+          ]
+        }
+      }
+    ],
+    "end": {
+      "ticks": 60,
+      "state": "won",
+      "score": 597
+    }
+  }
+}

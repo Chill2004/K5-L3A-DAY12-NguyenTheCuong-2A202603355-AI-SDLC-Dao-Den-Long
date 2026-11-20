@@ -31,15 +31,15 @@ S('01_pickup', { ...quiet, player: { pos: [0, 0, 0], carried: 0, flames: 3 }, mo
 // L1 (0,0,25), đứng (0,0,23): khoảng cách 2.0 = interact_radius (biên <= r). 10 x 10 + 100 = 200.
 S('02_deposit_light', { ...quiet, player: { pos: [0, 0, 23], carried: 10 } },
   { frames: press('interact', 0) },
-  { requirement: 'R3 nạp ở biên interact_radius 2.0; đủ 10 thì thắp; điểm 10/đom đóm nạp + 100/đèn = 200', seed: 1, ticks: 20, snapshot_every: 10,
+  { requirement: 'R3 nạp ở biên interact_radius 2.0; đủ 10 thì thắp lần đầu; điểm (Ticket-03) 10 x 5 + 100 = 150', seed: 1, ticks: 20, snapshot_every: 10,
     expect: {
       events: [
         { tick: 1, name: 'deposit', data: { lantern_id: 'L1', amount: 10, deposited: 10 } },
-        { tick: 1, name: 'lantern_lit', data: { lantern_id: 'L1' } }],
+        { tick: 1, name: 'lantern_lit', data: { lantern_id: 'L1', relight: false } }],
       no_events: ['game_over'],
-      snapshots: [{ tick: 10, match: { score: 200, player: { carried: 0 },
-        lanterns: [{ id: 'L1', lit: true, deposited: 10 }, { lit: false }, { lit: false }, { lit: false }, { lit: false }] } }],
-      end: { ticks: 20, state: 'playing', score: 200 } } });
+      snapshots: [{ tick: 10, match: { score: 150, player: { carried: 0, capacity: 12 },
+        lanterns: [{ id: 'L1', lit: true, deposited: 10, ever_lit: true, relit_count: 0 }, { lit: false, fuel: 0 }, { lit: false }, { lit: false }, { lit: false }] } }],
+      end: { ticks: 20, state: 'playing', score: 150 } } });
 
 // Hai đèn cách đều 2 m: chọn id nhỏ hơn (L1). Nạp một phần 3 -> 4/10, điểm 30.
 S('03_partial_tiebreak', { ...quiet, player: { pos: [0, 0, 0], carried: 3 },
@@ -50,19 +50,28 @@ S('03_partial_tiebreak', { ...quiet, player: { pos: [0, 0, 0], carried: 3 },
       events: [{ tick: 1, name: 'deposit', data: { lantern_id: 'L1', amount: 3, deposited: 4 } }],
       event_count: { deposit: 1, lantern_lit: 0 },
       snapshots: [{ tick: 10, match: { lanterns: [{ deposited: 4 }, { deposited: 0 }, {}, {}, {}] } }],
-      end: { ticks: 30, state: 'playing', score: 30 } } });
+      end: { ticks: 30, state: 'playing', score: 15 } } });
 
-// 100 (nạp) + 100 (đèn) + floor(299.983)*2=598 + 50*3=150 = 948. Đèn lit sẵn từ scenario không cộng điểm.
-S('04_win_all_lit', { ...quiet, player: { pos: [0, 0, 23], carried: 10 },
+// [Ticket-03 THAY THẾ 04_win_all_lit] Không còn thắng sớm. Bình minh: đèn sáng >= ceil(0.6 x n).
+// time_left 1 s, L1-L3 sáng (fuel 100 -> 99 sau 60 tick): điểm = 3 x (50 + 99) + 3 x 50 = 597.
+S('04_win_dawn_survived', { ...quiet, time_left_s: 1, lanterns: [{ id: 'L1', lit: true }, { id: 'L2', lit: true }, { id: 'L3', lit: true }] }, null,
+  { requirement: 'T3 thắng khi sống tới bình minh và >= 3/5 đèn sáng; điểm 3 x (50 + floor(99)) + 3 x 50 = 597', seed: 1, ticks: 600, snapshot_every: 10,
+    expect: {
+      events: [{ tick: 60, name: 'game_over', data: { result: 'won', reason: 'dawn_survived' } }],
+      snapshots: [{ tick: 0, match: { score: 0, player: { capacity: 10 }, lanterns: [{ lit: true, fuel: 100, ever_lit: true }, {}, {}, { lit: false }, {}] } }],
+      end: { ticks: 60, state: 'won', score: 597 } } });
+S('04b_lose_dawn_below_threshold', { ...quiet, time_left_s: 1, lanterns: [{ id: 'L1', lit: true }, { id: 'L2', lit: true }] }, null,
+  { requirement: 'T3 hết giờ mà chỉ 2/5 đèn sáng (< 3) thì thua dawn', seed: 1, ticks: 600, snapshot_every: 10,
+    expect: { events: [{ tick: 60, name: 'game_over', data: { result: 'lost', reason: 'dawn' } }], end: { ticks: 60, state: 'lost', score: 0 } } });
+S('04c_all_lit_no_early_end', { ...quiet, player: { pos: [0, 0, 23], carried: 10 },
   lanterns: [{ id: 'L2', lit: true }, { id: 'L3', lit: true }, { id: 'L4', lit: true }, { id: 'L5', lit: true }] },
   { frames: [{ tick: 0, interact: true }] },
-  { requirement: 'R5 thắng khi đủ đèn; điểm = 100 + 100 + 299*2 + 3*50 = 948', seed: 1, ticks: 600, snapshot_every: 10,
+  { requirement: 'T3 thắp đủ 5/5 đèn không kết thúc Đêm; sức chứa 10 + 2 x 1 = 12 (đèn đặt sẵn không tính)', seed: 1, ticks: 120, snapshot_every: 10,
     expect: {
-      events: [
-        { tick: 1, name: 'lantern_lit', data: { lantern_id: 'L1' } },
-        { tick: 1, name: 'game_over', data: { result: 'won', reason: 'all_lit' } }],
-      snapshots: [{ tick: 0, match: { score: 0 } }],
-      end: { ticks: 1, state: 'won', score: 948 } } });
+      events: [{ tick: 1, name: 'lantern_lit', data: { lantern_id: 'L1', relight: false } }],
+      no_events: ['game_over'],
+      snapshots: [{ tick: 10, match: { player: { capacity: 12 } } }],
+      end: { ticks: 120, state: 'playing', score: 150 } } });
 
 // Tâm pulse (0,0.8,0); S1 tâm (4,1,0): 3D 4.005 <= 5. Đẩy 4/15 m/tick trong tick 1..15 -> x=8; choáng tick 1..120, tick 121 về chase.
 // Hồi chiêu 180 tick đặt ở tick 1, giảm ở tick 2..10 -> 171 -> 2.85 s.
@@ -234,7 +243,7 @@ S('16_pause', { ...quiet },
     expect: {
       events: [{ tick: 11, name: 'paused', data: {} }, { tick: 31, name: 'resumed', data: {} }],
       snapshots: [
-        { tick: 20, match: { state: 'paused', sim_tick: 10, time_left_s: 299.833, player: { pos: [0, 0, 1] } } },
+        { tick: 20, match: { state: 'paused', sim_tick: 10, time_left_s: 239.833, player: { pos: [0, 0, 1] } } },
         { tick: 30, match: { state: 'paused', sim_tick: 10 } },
         { tick: 40, match: { state: 'playing', sim_tick: 20, player: { pos: [0, 0, 2] } } }],
       end: { ticks: 60, state: 'playing' } } });
@@ -320,4 +329,69 @@ S('23_night2_drifter_schedule', { random_motes: false, random_shades: false, pla
       { tick: 1200, match: { drifters: [{ id: 'D1', state: 'idle' }] } },
       { tick: 2400, match: { drifters: [{ id: 'D1' }, { id: 'D2' }] } },
       { tick: 3600, match: { drifters: [{ id: 'D1' }, { id: 'D2' }] } }] } });
+
+// ===== Phase 3: dầu đèn, hút dầu, luật thắng mới =====
+// fuel 1 = 60 đơn vị, hao 1 đơn vị/tick -> tắt ở tick 60: lantern_out, deposited 0, ever_lit vẫn true.
+S('24_fuel_decay_out', { ...quiet, lanterns: [{ id: 'L1', lit: true, fuel: 1, deposited: 10 }] }, null,
+  { requirement: 'T3 dầu hao 1/s; fuel <= 0 thì tắt, deposited = 0, lantern_out, ever_lit = true', seed: 1, ticks: 100, snapshot_every: 10,
+    expect: {
+      events: [{ tick: 60, name: 'lantern_out', data: { lantern_id: 'L1' } }],
+      snapshots: [
+        { tick: 30, match: { lanterns: [{ lit: true, fuel: 0.5 }, {}, {}, {}, {}] } },
+        { tick: 60, match: { lanterns: [{ lit: false, fuel: 0, deposited: 0, ever_lit: true }, {}, {}, {}, {}] } }] } });
+
+// fuel 55 -> 54.983 ở tick 1: used = min(10, ceil(45.017/10)=5) = 5 -> fuel 100 (chặn trần); tick 11: 99.833 -> used 1.
+S('25_refuel', { ...quiet, player: { pos: [0, 0, 0], carried: 10 }, lanterns: [{ id: 'L1', pos: [0, 0, 1], lit: true, fuel: 55 }] },
+  { frames: [...press('interact', 0), ...press('interact', 10)] },
+  { requirement: 'T3 châm dầu: used = min(mang, ceil((100-fuel)/10)), fuel = min(100, fuel + 10 x used), +5/đom đóm', seed: 1, ticks: 30, snapshot_every: 10,
+    expect: {
+      events: [{ tick: 1, name: 'refuel', data: { lantern_id: 'L1', amount: 5, fuel: 100 } }, { tick: 11, name: 'refuel', data: { lantern_id: 'L1', amount: 1, fuel: 100 } }],
+      event_count: { refuel: 2, lantern_lit: 0, deposit: 0 },
+      snapshots: [{ tick: 20, match: { player: { carried: 4 } } }],
+      end: { ticks: 30, score: 30 } } });
+
+// Đèn đã từng sáng chỉ cần 5 để thắp lại: +25 + 40 = 65; relit_count 1; sức chứa 12.
+S('26_relight', { ...quiet, player: { pos: [0, 0, 0], carried: 5 }, lanterns: [{ id: 'L1', pos: [0, 0, 1], lit: false, ever_lit: true }] },
+  { frames: press('interact', 0) },
+  { requirement: 'T3 thắp lại đèn ever_lit chỉ cần 5; lantern_lit relight: true; +40; relit_count; sức chứa tăng', seed: 1, ticks: 20, snapshot_every: 10,
+    expect: {
+      events: [{ tick: 1, name: 'deposit', data: { lantern_id: 'L1', amount: 5, deposited: 5 } }, { tick: 1, name: 'lantern_lit', data: { lantern_id: 'L1', relight: true } }],
+      snapshots: [{ tick: 10, match: { player: { carried: 0, capacity: 12 }, lanterns: [{ lit: true, relit_count: 1, ever_lit: true }, {}, {}, {}, {}] } }],
+      end: { ticks: 20, score: 65 } } });
+
+// S1 wander tới đèn yếu L1 (fuel 29 < 30): 0.025 m/tick, tới 2 m ở tick 41 -> drain. Hút từ tick 42; fuel_drain ở tick 101:
+// fuel = (1740 - 101 - 300)/60 = 22.3. Mây ở xa (48 m) nên không chase.
+S('27_drain', { ...quiet, player: { pos: [0, 0, -35] }, lanterns: [{ id: 'L1', pos: [0, 0, 10], lit: true, fuel: 29 }], shades: [{ id: 'S1', pos: [0, 1, 13.01], state: 'wander' }] }, null,
+  { requirement: 'T3 bóng wander tới đèn fuel < 30 (mất vùng an toàn), cách <= 2 m thì drain, hút 5/s + hao 1/s, fuel_drain mỗi 60 tick', seed: 1, ticks: 130, snapshot_every: 10,
+    expect: {
+      events: [{ tick: 101, name: 'fuel_drain', data: { lantern_id: 'L1', shade_id: 'S1', fuel: 22.3 } }],
+      event_count: { fuel_drain: 1 },
+      snapshots: [{ tick: 40, match: { shades: [{ state: 'wander' }] } }, { tick: 50, match: { shades: [{ state: 'drain', pos: [0, 1, 12] }] } }] } });
+
+// Tỏa Sáng trúng bóng đang drain: tổng +15.
+S('28_pulse_drain_bonus', { ...quiet, player: { pos: [0, 0, 7], carried: 3 }, lanterns: [{ id: 'L1', pos: [0, 0, 10], lit: true, fuel: 20 }],
+  shades: [{ id: 'S1', pos: [0, 1, 11.5], state: 'drain', target_lantern_id: 'L1' }] },
+  { frames: press('pulse', 0) },
+  { requirement: 'T3 Tỏa Sáng trúng bóng đang drain: stunned, tổng +15', seed: 1, ticks: 20, snapshot_every: 10,
+    expect: {
+      events: [{ tick: 1, name: 'pulse', data: { stunned_ids: ['S1'] } }],
+      snapshots: [{ tick: 0, match: { shades: [{ state: 'drain' }] } }, { tick: 10, match: { score: 15, shades: [{ state: 'stunned' }] } }] } });
+
+// Đêm 2 cần ceil(0.6 x 6) = 4; Đêm 3 cần ceil(0.6 x 7) = 5.
+S('29_win_threshold_night2', { ...quiet, time_left_s: 1, lanterns: ['L1', 'L2', 'L3', 'L4'].map((id) => ({ id, lit: true })) }, null,
+  { requirement: 'T3 Đêm 2 thắng với 4/6 đèn sáng; điểm 4 x 149 + 150 = 746', seed: 1, night: 2, ticks: 120, snapshot_every: 10,
+    expect: { events: [{ tick: 60, name: 'game_over', data: { result: 'won', reason: 'dawn_survived' } }], end: { state: 'won', score: 746 } } });
+S('29b_lose_threshold_night3', { ...quiet, time_left_s: 1, player: { pos: [0, 0, -30] }, lanterns: ['L1', 'L2', 'L3', 'L4'].map((id) => ({ id, lit: true })) }, null,
+  { requirement: 'T3 Đêm 3 chỉ 4/7 đèn sáng (< 5) thì thua dawn', seed: 1, night: 3, ticks: 120, snapshot_every: 10,
+    expect: { events: [{ tick: 60, name: 'game_over', data: { result: 'lost', reason: 'dawn' } }], end: { state: 'lost' } } });
+
+// Châm đèn yếu (20) lên >= 30 khi có bóng trong vùng 6 m: bóng bị đẩy ra mép trong 30 tick -> (0,1,-4.5).
+S('30_refuel_evict', { ...quiet, player: { pos: [0, 0, 0], carried: 10 }, lanterns: [{ id: 'L1', pos: [0, 0, 1.5], lit: true, fuel: 20 }],
+  shades: [{ id: 'S1', pos: [0, 1, 0.5], state: 'stunned', state_ticks_left: 300 }] },
+  { frames: press('interact', 0) },
+  { requirement: 'T3 châm dầu lên >= 30 khi có bóng trong vùng: đẩy ra mép trong 30 tick, không gây sát thương', seed: 1, ticks: 60, snapshot_every: 10,
+    expect: {
+      events: [{ tick: 1, name: 'refuel', data: { lantern_id: 'L1', amount: 9, fuel: 100 } }],
+      no_events: ['player_hit'],
+      snapshots: [{ tick: 30, match: { shades: [{ pos: [0, 1, -4.5] }] } }] } });
 console.log('ok');
